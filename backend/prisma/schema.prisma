@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Document model: stores uploaded documents/text
+model Document {
+  id        String    @id @default(cuid())
+  content   String    // The text content of the document
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  analyses Analysis[]
+
+  @@map("documents")
+}
+
+// Analysis model: stores AI analysis results
+// When user is not satisfied, the previous analysis is deleted and a new one is created.
+// Once satisfied, the analysis is persisted.
+model Analysis {
+  id          String   @id @default(cuid())
+  documentId  String
+  userQuery   String?  // Optional text/query from the user
+  type        String   // e.g., "summary", "classification", "qa"
+  result      String   // JSON string with the analysis result
+  createdAt   DateTime @default(now())
+
+  // Relations
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("analyses")
+}
