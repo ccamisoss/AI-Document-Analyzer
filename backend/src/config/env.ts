@@ -16,9 +16,9 @@ export const env = {
 export function validateEnv() {
   const missing: string[] = [];
 
-  // if (!env.databaseUrl) {
-  //   missing.push("DATABASE_URL");
-  // }
+  if (!env.databaseUrl) {
+    missing.push("DATABASE_URL");
+  }
 
   if (missing.length > 0) {
     throw new Error(
