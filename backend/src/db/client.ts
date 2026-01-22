@@ -1,28 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 
-/**
- * Prisma Client singleton instance.
- * 
- * This implementation prevents multiple instances of PrismaClient from being created,
- * which is especially important with hot-reload (nodemon, etc.) where modules
- * can be re-imported multiple times.
- * 
- * The pattern uses globalThis to store the instance, ensuring that even if
- * the module is re-imported, the same instance is reused across the application.
- */
-
+ // Prisma Client singleton instance.
+ // The pattern uses globalThis to store the instance, ensuring that even if
+ // the module is re-imported, the same instance is reused across the application.
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Create or reuse PrismaClient instance
 const prismaClient: PrismaClient =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: ["query", "error", "warn"],
   });
 
-// Connect to database (Prisma connects lazily, but we can connect eagerly)
 if (!globalForPrisma.prisma) {
   prismaClient
     .$connect()
