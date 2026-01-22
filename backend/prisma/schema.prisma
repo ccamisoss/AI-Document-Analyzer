@@ -11,6 +11,7 @@ datasource db {
 // Document model: stores uploaded documents/text
 model Document {
   id        String    @id @default(cuid())
+  userId   String?
   content   String // The text content of the document
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -18,7 +19,6 @@ model Document {
   // Relations
   analyses Analysis[]
   User     User?      @relation(fields: [userId], references: [id])
-  userId   String?
 
   @@map("documents")
 }
