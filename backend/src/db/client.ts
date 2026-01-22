@@ -15,17 +15,28 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
+// Create or reuse PrismaClient instance
+const prismaClient: PrismaClient =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: ["query", "error", "warn"],
-  }).$connect().then(() => {
-    console.log("Prisma Client connected");
-  }).catch((error: unknown) => {
-    console.error("Prisma Client connection error:", error);
   });
 
-globalForPrisma.prisma = prisma;
+// Connect to database (Prisma connects lazily, but we can connect eagerly)
+if (!globalForPrisma.prisma) {
+  prismaClient
+    .$connect()
+    .then(() => {
+      console.log("Prisma Client connected");
+    })
+    .catch((error: unknown) => {
+      console.error("Prisma Client connection error:", error);
+    });
+  
+  globalForPrisma.prisma = prismaClient;
+}
+
+export const prisma = prismaClient;
 
 export async function disconnectPrisma() {
   await prisma.$disconnect();
