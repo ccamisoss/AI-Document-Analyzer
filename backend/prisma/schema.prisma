@@ -24,15 +24,17 @@ model Document {
 }
 
 // Analysis model: stores AI analysis results
-// When user is not satisfied, the previous analysis is deleted and a new one is created.
-// Once satisfied, the analysis is persisted.
 model Analysis {
-  id          String   @id @default(cuid())
-  documentId  String
-  userQuery   String?  // Optional text/query from the user
-  type        String   // e.g., "summary", "classification", "qa"
-  result      String   // JSON string with the analysis result
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  documentId    String
+  userQuery     String?  // Optional text/query from the user
+  type          String   // e.g., "summary", "classification", "qa"
+  promptVersion String
+  result        Json   // JSON with the analysis result
+  status        String // "draft" | "final"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
 
   // Relations
   document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)

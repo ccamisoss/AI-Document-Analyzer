@@ -7,6 +7,7 @@ import { env } from "./config/env.js";
 export function createApp() {
   const app = express();
 
+  // Middleware
   app.use(express.json({ limit: "2mb" }));
 
   app.use(
