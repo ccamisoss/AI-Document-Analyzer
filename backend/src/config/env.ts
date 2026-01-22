@@ -11,6 +11,7 @@ export const env = {
 
   databaseUrl: process.env.DATABASE_URL,
   openaiApiKey: process.env.OPENAI_API_KEY,
+  jwtSecret: process.env.JWT_SECRET,
 } as const;
 
 export function validateEnv() {
@@ -18,6 +19,10 @@ export function validateEnv() {
 
   if (!env.databaseUrl) {
     missing.push("DATABASE_URL");
+  }
+
+  if (!env.jwtSecret) {
+    missing.push("JWT_SECRET");
   }
 
   if (missing.length > 0) {
