@@ -27,11 +27,9 @@ model Document {
 model Analysis {
   id            String   @id @default(cuid())
   documentId    String
-  userQuery     String?  // Optional text/query from the user
-  type          String   // e.g., "summary", "classification", "qa"
-  promptVersion String
-  result        Json   // JSON with the analysis result
-  status        String // "draft" | "final"
+  userPrompt    String?
+  result        Json   // Structured AI output
+  status        String // "discarded" | "final"
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
