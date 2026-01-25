@@ -4,6 +4,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: Pick<User, "id" | "email">;
+      file?: Express.Multer.File;
     }
   }
 }

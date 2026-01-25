@@ -3,10 +3,8 @@ import cors from "cors";
 import { env } from "./config/env.js";
 
 import authRouter from "./modules/auth/auth.routes.js";
-import documentsRouter from "./modules/documents/documents.routes.js";
+import analysisRouter from "./modules/analysis/analysis.routes.js";
 
-// App config is separated from server startup to allow easier testing
-// and future serverless deployment.
 export function createApp() {
   const app = express();
 
@@ -25,7 +23,7 @@ export function createApp() {
   });
 
   app.use("/auth", authRouter)
-  app.use("/documents", documentsRouter)
+  app.use("/analysis", analysisRouter)
 
   app.use((_req, res) => {
     res.status(404).json({ error: "Not Found" });
