@@ -1,42 +1,231 @@
-#root {
-  max-width: 1280px;
+.app-container {
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.app-container h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.upload-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.file-input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.file-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.file-input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+  cursor: pointer;
+}
+
+.file-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  word-break: break-word;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.prompt-input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.prompt-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.prompt-textarea {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  line-height: 1.5;
 }
 
-.card {
-  padding: 2em;
+.prompt-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.read-the-docs {
-  color: #888;
+.prompt-textarea:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.submit-button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  min-width: 150px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #535bf2;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.success-message {
+  padding: 1rem;
+  background-color: #efe;
+  color: #3c3;
+  border: 1px solid #cfc;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.response-panel {
+  width: 100%;
+  max-width: 800px;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.success-panel {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.warning-message {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.response-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.response-section {
+  margin-bottom: 2rem;
+}
+
+.response-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.summary-text {
+  line-height: 1.6;
+  color: #555;
+}
+
+.summary-text p {
+  margin: 0.5rem 0;
+}
+
+.summary-text p:first-child {
+  margin-top: 0;
+}
+
+.summary-text p:last-child {
+  margin-bottom: 0;
+}
+
+.bullet-list {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.bullet-list li {
+  margin-bottom: 0.5rem;
+}
+
+.bullet-list li:last-child {
+  margin-bottom: 0;
+}
+
+.notes-text {
+  margin: 0.5rem 0 0 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+.numbered-list {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.numbered-list li {
+  margin-bottom: 0.5rem;
+}
+
+.numbered-list li:last-child {
+  margin-bottom: 0;
 }
