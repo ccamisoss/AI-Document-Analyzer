@@ -1,12 +1,50 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
+import authService from './services/auth.service'
+import Login from './pages/Login'
+import Register from './pages/Register'
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState(null)
+  const [showRegister, setShowRegister] = useState(false)
   const [file, setFile] = useState(null)
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [response, setResponse] = useState(null)
+
+  useEffect(() => {
+    const token = authService.getToken()
+    const savedUser = authService.getUser()
+    
+    if (token && savedUser) {
+      setIsAuthenticated(true)
+      setUser(savedUser)
+    }
+  }, [])
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData)
+    setIsAuthenticated(true)
+    setShowRegister(false)
+  }
+
+  const handleRegisterSuccess = (userData) => {
+    setUser(userData)
+    setIsAuthenticated(true)
+    setShowRegister(false)
+  }
+
+  const handleLogout = () => {
+    authService.logout()
+    setIsAuthenticated(false)
+    setUser(null)
+    setFile(null)
+    setPrompt('')
+    setResponse(null)
+    setError(null)
+  }
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
@@ -36,21 +74,33 @@ function App() {
     setResponse(null)
 
     try {
+      const token = authService.getToken()
+      if (!token) {
+        throw new Error('You are not authenticated')
+      }
+
       const formData = new FormData()
       formData.append('file', file)
+      if (prompt.trim()) {
+        formData.append('prompt', prompt.trim())
+      }
 
       const fetchResponse = await fetch('http://localhost:3001/analysis', {
         method: 'POST',
         body: formData,
         headers: {
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWtxMThlMTIwMDAwM3F4eXVuZzVweW1pIiwiaWF0IjoxNzY5MzY1NjkxLCJleHAiOjE3Njk5NzA0OTF9.s7ERXXUGpW5oLNSt2h3Y43Rs50mJJPHXEUpFTKCQlOg"
+          "Authorization": `Bearer ${token}`
         }
       })
 
       const data = await fetchResponse.json()
 
       if (!fetchResponse.ok) {
-        throw new Error(data.message || 'Error processing the document')
+        if (fetchResponse.status === 401) {
+          handleLogout()
+          throw new Error('Session expired. Please log in again.')
+        }
+        throw new Error(data.error || data.message || 'Error processing the document')
       }
 
       setResponse(data)
@@ -58,16 +108,81 @@ function App() {
       setPrompt('')
       e.target.reset()
     } catch (err) {
-      setError(err.message || 'Error al enviar el documento')
+      setError(err.message || 'Error sending the document')
     } finally {
       setLoading(false)
     }
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div>
+        {showRegister ? (
+          <Register onRegisterSuccess={handleRegisterSuccess} />
+        ) : (
+          <Login onLoginSuccess={handleLoginSuccess} />
+        )}
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          {showRegister ? (
+            <p style={{ color: 'white' }}>
+              Already have an account?{' '}
+              <button
+                onClick={() => setShowRegister(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                }}
+              >
+                Sign in
+              </button>
+            </p>
+          ) : (
+            <p style={{ color: 'white' }}>
+              Don't have an account?{' '}
+              <button
+                onClick={() => setShowRegister(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                }}
+              >
+                Sign up
+              </button>
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="app-container">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ color: '#4a5568' }}>{user?.email}</span>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '0.5rem 1rem',
+              background: '#e53e3e',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
       <h1>Document Analyzer</h1>
-      
       <form onSubmit={handleSubmit} className="upload-form">
         <div className="file-input-container">
           <label htmlFor="pdf-file" className="file-label">
