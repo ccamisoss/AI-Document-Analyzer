@@ -1,9 +1,20 @@
+const ACTIVE_PROMPT_VERSION = "v1";
+
+export type PromptVersion = "v1";
+
 type BuildPromptInput = {
   documentText: string;
   userPrompt?: string;
+  version?: PromptVersion;
 };
 
-const buildSystemPrompt = (): string => {
+type PromptResult = {
+  system: string;
+  user: string;
+  version: PromptVersion;
+};
+
+const buildSystemPrompt_v1 = (): string => {
   return `
     You are a document analysis assistant.
 
@@ -36,7 +47,7 @@ const buildSystemPrompt = (): string => {
   `;
 };
 
-const buildUserPrompt = (
+const buildUserPrompt_v1 = (
   documentText: string,
   userPrompt?: string
 ): string => {
@@ -64,11 +75,40 @@ const buildUserPrompt = (
   return prompt;
 };
 
-const buildPrompt = ({ documentText, userPrompt }: BuildPromptInput) => {
+const buildPrompt_v1 = ({
+  documentText,
+  userPrompt,
+}: {
+  documentText: string;
+  userPrompt?: string;
+}): PromptResult => {
   return {
-    system: buildSystemPrompt(),
-    user: buildUserPrompt(documentText, userPrompt),
+    system: buildSystemPrompt_v1(),
+    user: buildUserPrompt_v1(documentText, userPrompt),
+    version: "v1",
   };
+};
+
+const buildPrompt = ({
+  documentText,
+  userPrompt,
+  version,
+}: BuildPromptInput): PromptResult => {
+  const promptVersion = version || (ACTIVE_PROMPT_VERSION as PromptVersion);
+
+  switch (promptVersion) {
+    case "v1":
+      return buildPrompt_v1(
+        userPrompt !== undefined
+          ? { documentText, userPrompt }
+          : { documentText }
+      );
+
+    default:
+      throw new Error(
+        `Unsupported prompt version: ${promptVersion}. Supported versions: v1`
+      );
+  }
 };
 
 export { buildPrompt };

@@ -63,11 +63,13 @@ const createAnalysis = async ({
     },
   });
 
-  const { system : systemPrompt, user: finalUserPrompt } = buildPrompt(
+  const promptResult = buildPrompt(
     userPrompt !== undefined
       ? { documentText, userPrompt }
       : { documentText }
   );
+
+  const { system: systemPrompt, user: finalUserPrompt, version: promptVersion } = promptResult;
 
   let rawResponse: string;
 
@@ -110,6 +112,7 @@ const createAnalysis = async ({
     data: {
       documentId: document.id,
       ...(userPrompt && { userPrompt }),
+      promptVersion,
       status: "final",
       result: aiResult,
     },

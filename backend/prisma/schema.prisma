@@ -28,6 +28,7 @@ model Analysis {
   id            String   @id @default(cuid())
   documentId    String
   userPrompt    String?
+  promptVersion String   @default("v1")
   result        Json   // Structured AI output
   status        String // "discarded" | "final"
   createdAt     DateTime @default(now())
