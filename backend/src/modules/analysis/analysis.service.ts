@@ -103,7 +103,6 @@ const createAnalysis = async ({
     return {
       status: "error",
       message: "Invalid AI response structure",
-      else: aiResult
     };
   }
 

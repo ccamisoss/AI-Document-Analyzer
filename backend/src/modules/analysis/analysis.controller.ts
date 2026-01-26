@@ -27,7 +27,6 @@ const createAnalysis = async (req: Request, res: Response) => {
       file,
       userPrompt,
     });
-    console.log(999, result)
 
     return res.status(200).json(result);
   } catch (error) {

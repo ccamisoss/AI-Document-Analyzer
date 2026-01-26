@@ -26,6 +26,10 @@ export function validateEnv() {
     missing.push("JWT_SECRET");
   }
 
+  if (env.mockLlm !== "true" && !env.openaiApiKey) {
+    missing.push("OPENAI_API_KEY (required when MOCK_LLM is not 'true')");
+  }
+
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}`,

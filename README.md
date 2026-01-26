@@ -18,7 +18,7 @@ An AI-powered full-stack application that analyzes PDF documents and returns str
 - **Framework**: React
 - **Build Tool**: Vite
 - **Styling**: TailwindCSS
-- **HTTP Client**: Axios
+- **HTTP Client**: Fetch API (native)
 
 ## Local Setup
 
