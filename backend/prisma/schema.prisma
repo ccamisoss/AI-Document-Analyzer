@@ -30,7 +30,6 @@ model Analysis {
   userPrompt    String?
   promptVersion String   @default("v1")
   result        Json   // Structured AI output
-  status        String // "discarded" | "final"
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

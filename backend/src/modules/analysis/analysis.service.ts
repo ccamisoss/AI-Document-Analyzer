@@ -53,16 +53,6 @@ const createAnalysis = async ({
     },
   });
 
-  await prisma.analysis.updateMany({
-    where: {
-      documentId: document.id,
-      status: "final",
-    },
-    data: {
-      status: "discarded",
-    },
-  });
-
   const promptResult = buildPrompt(
     userPrompt !== undefined
       ? { documentText, userPrompt }
@@ -113,7 +103,6 @@ const createAnalysis = async ({
       documentId: document.id,
       ...(userPrompt && { userPrompt }),
       promptVersion,
-      status: "final",
       result: aiResult,
     },
   });
