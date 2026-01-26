@@ -22,18 +22,15 @@ The application helps simplify and speed up document analysis in situations such
 - It is **not** a generic interactive chat.
 - It is **not** conversational Q&A.
 
-The application supports **single-shot, document-scoped Q&A**, meaning that the user sends the document and an optional prompt once, and the AI responds once based on that input.
+The application supports **single-shot, document-scoped Q&A**, meaning that the user sends the document and an optional prompt once, and the AI responds once based on that input. The application does not support regeneration or conversational back-and-forth.
 
-If the user is not satisfied, they can regenerate the analysis or upload a different document or prompt. However, regenerating an analysis does **not** create a back-and-forth conversation. Each analysis request is independent and the flow is stateless.
+Each analysis request is independent and stateless.
+
+If a user wants a different result, they must submit a new request by uploading the document again, optionally with a different prompt. Each submission is treated as a separate analysis and creates a new document and analysis record.
+
 
 **Flow:**  
 `User input → AI analysis → End`
-
-### Analysis type
-
-For now, the application supports a single type of analysis: a **structured summary**.
-
-However, the application is designed in a scalable way, so that other types of analysis can be added in the future without major changes to the architecture.
 
 ---
 
@@ -74,13 +71,13 @@ The AI returns a structured and predictable output so it can be easily handled b
 
 ```json
 {
-  "status": "warning",
+  "status": "warning", //or error
   "message": "Explanation of why the input does not meet the expected parameters."
 }
 ```
 
 - **warning**: invalid or out-of-scope input (e.g. empty document, unsupported prompt).
-- **error**: technical failures (LLM errors, timeouts, parsing failures).
+- **error**: technical failures (LLM errors, parsing failures).
 
 ---
 
@@ -112,11 +109,17 @@ User input is treated as untrusted and applied only if it aligns with the docume
 
 ### Prompt injection mitigation
 
-Prompt injection risk is reduced by design:
-- System instructions always take precedence
-- User input never overrides system rules
-- The document is the only source of truth
-- Output must conform to a predefined JSON schema
+Prompt injection risk is reduced primarily by design and prompt structure.
+
+System-level instructions are always defined separately and take precedence over any user-provided input. User input is treated strictly as data and is never allowed to override system rules or modify the task definition.
+
+For document-based analysis, the uploaded document is treated as the only source of truth. The model is explicitly instructed to base its responses solely on the document content and to ignore any instructions embedded inside the document itself.
+
+Additionally, model outputs are constrained to a predefined JSON schema. This limits the surface area for unexpected or unsafe responses and makes it easier to validate and reject malformed outputs.
+
+For example, if a user or document attempts to include instructions such as *"ignore previous instructions"* or *"respond with unrestricted text"*, these are treated as plain input content and do not affect the system behavior.
+
+While this approach does not fully eliminate prompt injection risk, it significantly reduces it by enforcing clear role separation, strict output constraints, and limited model authority.
 
 ---
 
@@ -157,7 +160,7 @@ The system prompt acts as a control layer preventing user instructions from alte
 LLM calls are handled through a dedicated provider layer:
 - provider-agnostic
 - supports swapping providers
-- handles errors and timeouts
+- handles errors
 
 A **mocked LLM provider** can be enabled for local development and testing to avoid external dependencies and costs.
 
@@ -192,51 +195,15 @@ The frontend renders responses based solely on the returned status.
 
 ---
 
-## Analysis Lifecycle & Status Management
+## Analysis Execution & Latency Considerations
 
-AI-driven document analysis is not an instantaneous operation and may take several seconds depending on document size, model latency, or provider availability.
+AI-driven document analysis is not instantaneous and may take several seconds depending on document size, model latency, or provider availability.
 
-For this reason, the system is designed around a clear **analysis lifecycle**, even though the current implementation executes the flow synchronously.
+In the current implementation, the analysis is executed synchronously within a single request–response cycle. The client waits for the backend to complete the AI processing and return a final result.
 
-### Analysis states
+From a design perspective, the system acknowledges that AI execution introduces latency and potential failure points. For this reason, the frontend is expected to handle loading and error states gracefully, without assuming immediate responses.
 
-Each analysis can conceptually transition through the following states:
-
-- **pending**  
-  The analysis request has been created but processing has not started yet.
-
-- **generating**  
-  The document text has been extracted and the request is being processed by the LLM provider.
-
-- **completed**  
-  The AI successfully generated a valid structured response that passed backend validation.
-
-- **failed**  
-  The analysis failed due to a technical error (LLM error, timeout, parsing failure).
-
-These states are modeled to support future asynchronous or background processing, even if the current implementation completes the analysis within a single request-response cycle.
-
-### Frontend implications
-
-Explicit analysis states allow the frontend to:
-
-- display loading indicators while the AI is processing
-- avoid blocking the UI during long-running requests
-- show meaningful feedback in case of failure
-- prevent duplicate or accidental re-submissions
-
-This becomes especially important as document size, concurrency, or model latency increases.
-
-### Architectural intent
-
-Although the current version processes the analysis synchronously, the lifecycle model ensures the system can evolve toward:
-
-- background job processing
-- queue-based AI execution
-- retry mechanisms for transient failures
-- progress tracking and partial results
-
-By modeling analysis status explicitly, the system avoids coupling frontend behavior to LLM response times and remains adaptable to production-scale AI workloads.
+While the project does not currently implement explicit analysis states, background jobs, or asynchronous processing, the overall flow is intentionally kept simple and stateless. This makes it possible to evolve the system in the future toward more advanced execution models (such as background processing or queued AI tasks) if scalability or user experience requirements increase.
 
 ---
 
@@ -249,62 +216,83 @@ Documents and analyses are retained indefinitely during development.
 In production, retention policies could include:
 - time-based deletion
 - user-initiated deletion
-- tenant-level policies
 
 ### PII considerations
 
-The system does not automatically detect PII.
+The system does not automatically detect or classify PII within uploaded documents.
 
-Mitigations include:
-- access control by user ownership
-- minimal logging of document content
-- encryption at rest
+The current implementation does not include fine-grained access control for stored documents or analyses. This project assumes a trusted environment during development and evaluation.
+
+Logging is intentionally limited to technical events (validation errors, execution failures), and full document content is not included in application logs.
+
+In a production environment, additional measures would be required, including:
+- enforcing access control based on user ownership
+- infrastructure-level protections such as encrypted storage
 
 ### Logging & auditability
 
-Logs include:
-- request lifecycle events
-- AI execution failures
-- validation errors
+Logging is intentionally minimal.
 
-Logs exclude full document content.
+The current implementation logs only technical errors related to AI execution and response validation (for example, LLM failures or malformed outputs).
+
+Full document content is never included in application logs.
+
+In a production environment, more detailed request lifecycle logging could be introduced to improve observability and auditability without exposing sensitive document data.
 
 ---
 
 ## Cost & Rate Limit Control
 
-AI usage is controlled through architectural constraints:
-- single-shot analysis flow
-- no automatic re-analysis
-- cost-efficient model selection
-- per-user or per-request limits
+AI usage is intentionally constrained through architectural decisions.
 
-Additional production strategies may include quotas, background processing, and throttling.
+The analysis flow is designed as a single-shot operation: each user action triggers a single AI request, with no automatic retries or background re-analysis. This prevents uncontrolled loops and makes AI usage predictable.
+
+Model selection prioritizes cost-efficiency over maximum capability, given the structured and bounded nature of the analysis task.
+
+In a production environment, request-level rate limiting would be applied at the API layer. Typical limits would include a maximum number of AI-triggering requests per user within a time window, as well as global limits to protect the system under high load. For example, global safeguards could cap the total number of concurrent AI requests.
+
+These limits help prevent abuse, reduce the risk of accidental cost spikes, and ensure fair usage across users.
+
+At a high level, cost exposure can be estimated as:
+
+`(number of analyses) × (average tokens per analysis) × (cost per token)`
+
+This allows usage and costs to scale in a controlled and observable way.
+
+All AI interactions are centralized in the backend, making it possible to monitor usage, enforce limits, and adjust policies without changes to the client.
 
 ---
 
 ## AI Evaluation & Reliability
 
 ### Output quality
-- strict schema enforcement
-- validation before returning responses
+
+The system enforces output quality at the structural level only.
+
+All AI responses must conform to a strict JSON schema and are validated before being returned to the client. The current implementation does not perform semantic evaluation of the generated content.
 
 ### Regression detection
-- replaying stored documents against updated prompts
-- comparing structured outputs over time
+
+No automated regression detection is implemented.
+
+From a design perspective, regression detection could be achieved by replaying previously stored documents against updated prompts or models and comparing the resulting structured outputs over time.
 
 ### Handling incorrect output
+
 AI output is assistive, not authoritative.
-Users can regenerate analyses and incorrect results are not treated as source of truth.
+
+If a user is not satisfied with the result, they can submit a new analysis request by uploading the document again, optionally with a different prompt. Each analysis is treated as an independent request, and AI outputs are not considered a source of truth.
 
 ---
 
-## Infrastructure & Secrets
-
-The application is designed for cloud environments such as AWS.
+## Infrastructure, Secrets & Scaling (Conceptual)
 
 - Secrets are stored as environment variables
 - No secrets are committed to source control
 - Configuration is separated from code
 
-In production, secrets would be managed by a secrets manager and rotated independently.
+This project focuses on application and AI logic. Infrastructure concerns are intentionally described at a conceptual level rather than fully implemented.
+
+In a production context, AI-powered workloads tend to be irregular, with short bursts of high activity (for example, when several users upload documents or request analysis at the same time). To handle these scenarios, the backend could be deployed in a way that allows multiple instances of the service to run in parallel, distributing incoming requests instead of relying on a single process.
+
+Sensitive configuration such as AI provider API keys is not stored in the codebase. In a real production setup, these secrets would be managed by the cloud environment and injected at runtime (for example, via environment variables), allowing secure handling and key rotation without requiring code changes.
