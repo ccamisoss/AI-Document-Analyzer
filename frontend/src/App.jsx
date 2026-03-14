@@ -124,14 +124,13 @@ function App() {
         )}
         <div style={{ textAlign: 'center', marginTop: '1rem' }}>
           {showRegister ? (
-            <p style={{ color: 'white' }}>
+            <p>
               Already have an account?{' '}
               <button
                 onClick={() => setShowRegister(false)}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'white',
                   textDecoration: 'underline',
                   cursor: 'pointer',
                 }}
@@ -140,14 +139,13 @@ function App() {
               </button>
             </p>
           ) : (
-            <p style={{ color: 'white' }}>
+            <p>
               Don't have an account?{' '}
               <button
                 onClick={() => setShowRegister(true)}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'white',
                   textDecoration: 'underline',
                   cursor: 'pointer',
                 }}
@@ -163,8 +161,8 @@ function App() {
 
   return (
     <div className="app-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ backgroundColor: 'white', padding: '1rem', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0 auto'}}>
           <span style={{ color: '#4a5568' }}>{user?.email}</span>
           <button
             onClick={handleLogout}
@@ -182,8 +180,8 @@ function App() {
           </button>
         </div>
       </div>
-      <h1>Document Analyzer</h1>
       <form onSubmit={handleSubmit} className="upload-form">
+        <h1>Document Analyzer</h1>
         <div className="file-input-container">
           <label htmlFor="pdf-file" className="file-label">
             Select PDF file

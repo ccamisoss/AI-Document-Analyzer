@@ -1,11 +1,12 @@
 .app-container {
-  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding-bottom: 2rem;
 }
 
 .app-container h1 {
@@ -19,6 +20,11 @@
   flex-direction: column;
   gap: 1.5rem;
   align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .file-input-container {
@@ -113,16 +119,6 @@
   cursor: not-allowed;
 }
 
-.error-message {
-  padding: 1rem;
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
 
 .success-message {
   padding: 1rem;
@@ -136,8 +132,7 @@
 }
 
 .response-panel {
-  width: 100%;
-  max-width: 800px;
+  width: 80%;
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 1rem;
