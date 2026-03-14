@@ -13,6 +13,7 @@ export const env = {
   openaiApiKey: process.env.OPENAI_API_KEY,
   jwtSecret: process.env.JWT_SECRET,
   mockLlm: process.env.MOCK_LLM,
+  huggingfaceApiKey: process.env.HF_TOKEN,
 } as const;
 
 export function validateEnv() {

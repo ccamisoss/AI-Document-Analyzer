@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { env } from "../../config/env.js";
 
-type LLMProvider = "openai" | "mock";
+type LLMProvider = "openai" | "mock" | "huggingface";
 
 interface GenerateOptions {
   systemPrompt: string;
@@ -11,7 +11,7 @@ interface GenerateOptions {
 }
 
 const provider: LLMProvider =
-  env.mockLlm === "true" ? "mock" : "openai";
+  env.mockLlm === "true" ? "mock" : "huggingface";
 
 const openai = new OpenAI({
   apiKey: env.openaiApiKey,
@@ -39,6 +39,11 @@ export async function generateCompletion({
         userPrompt,
         model,
         temperature,
+      });
+    case "huggingface":
+      return generateWithHuggingFace({
+        systemPrompt,
+        userPrompt,
       });
 
     default:
@@ -88,4 +93,37 @@ async function generateWithMock({
   }
 
   return JSON.stringify(mockedResponse);
+}
+
+
+async function generateWithHuggingFace({
+  systemPrompt,
+  userPrompt,
+}: Pick<GenerateOptions, "systemPrompt" | "userPrompt">): Promise<string> {
+
+const response = await fetch(
+  "https://router.huggingface.co/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.huggingfaceApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-oss-120b:fastest",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+  }
+);
+
+const content = await response.json();
+
+if (!content.choices[0]?.message?.content) {
+  throw new Error("Empty response from LLM");
+}
+
+return content.choices[0]?.message?.content;
 }
