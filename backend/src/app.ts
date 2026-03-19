@@ -4,6 +4,7 @@ import { env } from "./config/env.js";
 
 import authRouter from "./modules/auth/auth.routes.js";
 import analysisRouter from "./modules/analysis/analysis.routes.js";
+import documentsRouter from "./modules/documents/documents.routes.js";
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
 
   app.use("/auth", authRouter)
   app.use("/analysis", analysisRouter)
+  app.use("/documents", documentsRouter)
 
   app.use((_req, res) => {
     res.status(404).json({ error: "Not Found" });

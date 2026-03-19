@@ -1,4 +1,5 @@
 import { DOMMatrix, ImageData, Path2D, DOMPoint, DOMRect } from "@napi-rs/canvas";
+import { prisma } from "../../db/client.js";
 
 // `pdf-parse` uses `pdfjs-dist` under the hood. `pdfjs-dist` expects browser globals
 // like `DOMMatrix` to exist. In Node, we provide them from `@napi-rs/canvas` before
@@ -72,6 +73,44 @@ const extractTextFromPdf = async (
     console.error("PDF parsing failed:", error);
     throw new Error("PDF_TEXT_EXTRACTION_FAILED");
   }
+};
+
+type GetDocumentsInput = {
+  userId: string;
+};
+
+const getDocuments = async ({ userId }: GetDocumentsInput) => {
+  return prisma.document.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+type DeleteDocumentInput = {
+  userId: string;
+  id: string;
+};
+
+const deleteDocument = async ({
+  userId,
+  id,
+}: DeleteDocumentInput): Promise<{ deletedCount: number }> => {
+  const result = await prisma.document.deleteMany({
+    where: { id, userId },
+  });
+
+  return { deletedCount: result.count };
+};
+
+export const documentsService = {
+  getDocuments,
+  deleteDocument,
 };
 
 export {
