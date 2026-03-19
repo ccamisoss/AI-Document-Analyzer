@@ -113,6 +113,62 @@ const createAnalysis = async ({
   };
 };
 
+type GetAnalysesByDocumentIdInput = {
+  userId: string;
+  documentId: string;
+};
+
+const getAnalysesByDocumentId = async ({
+  userId,
+  documentId,
+}: GetAnalysesByDocumentIdInput) => {
+  const document = await prisma.document.findFirst({
+    where: { id: documentId, userId },
+    select: { id: true },
+  });
+
+  if (!document) {
+    return null;
+  }
+
+  return prisma.analysis.findMany({
+    where: { documentId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      documentId: true,
+      userPrompt: true,
+      promptVersion: true,
+      result: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+type DeleteAnalysisInput = {
+  userId: string;
+  analysisId: string;
+};
+
+const deleteAnalysis = async ({
+  userId,
+  analysisId,
+}: DeleteAnalysisInput): Promise<{ deletedCount: number }> => {
+  const result = await prisma.analysis.deleteMany({
+    where: {
+      id: analysisId,
+      document: {
+        userId,
+      },
+    },
+  });
+
+  return { deletedCount: result.count };
+};
+
 export const analysisService = {
   createAnalysis,
+  getAnalysesByDocumentId,
+  deleteAnalysis,
 };

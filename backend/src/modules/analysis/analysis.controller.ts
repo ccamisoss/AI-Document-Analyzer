@@ -1,7 +1,10 @@
 import { type Request, type Response } from "express";
 import { analysisService } from "./analysis.service.js";
 
-const { createAnalysis : createAnalysisService } = analysisService
+const {
+  createAnalysis: createAnalysisService,
+  deleteAnalysis: deleteAnalysisService,
+} = analysisService;
 
 const createAnalysis = async (req: Request, res: Response) => {
   try {
@@ -39,4 +42,49 @@ const createAnalysis = async (req: Request, res: Response) => {
   }
 };
 
-export { createAnalysis };
+const deleteAnalysis = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const idParam = req.params.id;
+    const analysisId = Array.isArray(idParam) ? idParam[0] : idParam;
+
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+      });
+    }
+
+    if (!analysisId) {
+      return res.status(400).json({
+        status: "warning",
+        message: "Analysis id is required",
+      });
+    }
+
+    const { deletedCount } = await deleteAnalysisService({
+      userId,
+      analysisId,
+    });
+
+    if (deletedCount === 0) {
+      return res.status(404).json({
+        status: "warning",
+        message: "Analysis not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Analysis deleted successfully",
+      data: { deletedCount },
+    });
+  } catch (error) {
+    console.error("Delete analysis error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};
+
+export { createAnalysis, deleteAnalysis };
