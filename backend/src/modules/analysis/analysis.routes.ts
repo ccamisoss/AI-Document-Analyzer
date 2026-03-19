@@ -6,10 +6,7 @@ import { createAnalysis } from "./analysis.controller.js";
 const analysisRouter = Router();
 
 const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
+  storage: multer.memoryStorage()
 });
 
 analysisRouter.post("/", authenticate, upload.single("file"), createAnalysis);
