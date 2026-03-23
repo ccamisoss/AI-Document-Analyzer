@@ -1,12 +1,20 @@
-import { useState } from 'react';
-import authService from '../services/auth.service';
-import './Auth.css';
+import { useState } from "react";
+import authService from "../services/auth.service";
+import "./Auth.css";
+import { useNavigate } from "react-router-dom";
 
-function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function Login({ setUser, setIsAuthenticated }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); 
+  const navigate = useNavigate();
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    navigate("/");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,13 +23,13 @@ function Login({ onLoginSuccess }) {
 
     try {
       const result = await authService.login(email, password);
-      
+
       authService.saveToken(result.token);
       authService.saveUser(result.user);
 
-      onLoginSuccess(result.user);
+      handleLoginSuccess(result.user);
     } catch (err) {
-      setError(err.message || 'Error signing in');
+      setError(err.message || "Error signing in");
     } finally {
       setLoading(false);
     }
@@ -31,7 +39,7 @@ function Login({ onLoginSuccess }) {
     <div className="auth-container">
       <div className="auth-card">
         <h1 className="auth-title">Sign In</h1>
-        
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">
@@ -65,18 +73,14 @@ function Login({ onLoginSuccess }) {
             />
           </div>
 
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-message">{error}</div>}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
             className="auth-button"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
       </div>

@@ -1,12 +1,21 @@
-import { useState } from 'react';
-import authService from '../services/auth.service';
-import './Auth.css';
+import { useState } from "react";
+import authService from "../services/auth.service";
+import "./Auth.css";
+import { useNavigate } from "react-router-dom";
 
-function Register({ onRegisterSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function Register({ setUser, setIsAuthenticated, setShowRegister }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleRegisterSuccess = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    setShowRegister(false);
+    navigate("/");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,13 +24,13 @@ function Register({ onRegisterSuccess }) {
 
     try {
       const result = await authService.register(email, password);
-      
+
       authService.saveToken(result.token);
       authService.saveUser(result.user);
 
-      onRegisterSuccess(result.user);
+      handleRegisterSuccess(result.user);
     } catch (err) {
-      setError(err.message || 'Error registering user');
+      setError(err.message || "Error registering user");
     } finally {
       setLoading(false);
     }
@@ -31,7 +40,7 @@ function Register({ onRegisterSuccess }) {
     <div className="auth-container">
       <div className="auth-card">
         <h1 className="auth-title">Sign Up</h1>
-        
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">
@@ -69,18 +78,14 @@ function Register({ onRegisterSuccess }) {
             </small>
           </div>
 
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-message">{error}</div>}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
             className="auth-button"
           >
-            {loading ? 'Registering...' : 'Sign Up'}
+            {loading ? "Registering..." : "Sign Up"}
           </button>
         </form>
       </div>
