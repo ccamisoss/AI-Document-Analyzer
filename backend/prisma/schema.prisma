@@ -11,16 +11,18 @@ datasource db {
 // Document model: stores uploaded documents/text
 model Document {
   id        String    @id @default(cuid())
-  userId   String?
+  userId    String?
   content   String // The text content of the document
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  hash      String
 
   // Relations
   analyses Analysis[]
   User     User?      @relation(fields: [userId], references: [id])
 
   @@map("documents")
+  @@unique([userId, hash])
 }
 
 // Analysis model: stores AI analysis results

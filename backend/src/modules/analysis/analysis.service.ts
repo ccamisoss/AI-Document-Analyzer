@@ -1,7 +1,15 @@
-import { validatePdf, extractTextFromPdf } from "../documents/documents.service.js";
+import {
+  validatePdf,
+  extractTextFromPdf,
+} from "../documents/documents.service.js";
 import { buildPrompt } from "../ai/prompt.builder.js";
 import { generateCompletion } from "../ai/llm.provider.js";
 import { prisma } from "../../db/client.js";
+import crypto from "crypto";
+
+const generateDocumentHash = (buffer: Buffer) => {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+};
 
 type CreateAnalysisInput = {
   userId: string;
@@ -46,20 +54,34 @@ const createAnalysis = async ({
     };
   }
 
-  const document = await prisma.document.create({
-    data: {
+  const fileHash = generateDocumentHash(file.buffer);
+
+  let document = await prisma.document.findFirst({
+    where: {
       userId,
-      content: documentText,
+      hash: fileHash,
     },
   });
 
+  if (!document) {
+    document = await prisma.document.create({
+      data: {
+        userId,
+        content: documentText,
+        hash: fileHash,
+      },
+    });
+  }
+
   const promptResult = buildPrompt(
-    userPrompt !== undefined
-      ? { documentText, userPrompt }
-      : { documentText }
+    userPrompt !== undefined ? { documentText, userPrompt } : { documentText },
   );
 
-  const { system: systemPrompt, user: finalUserPrompt, version: promptVersion } = promptResult;
+  const {
+    system: systemPrompt,
+    user: finalUserPrompt,
+    version: promptVersion,
+  } = promptResult;
 
   let rawResponse: string;
 
