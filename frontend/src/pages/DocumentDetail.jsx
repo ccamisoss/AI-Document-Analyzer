@@ -205,6 +205,40 @@ export default function DocumentDetail() {
     }
   };
 
+  const handleDeleteDocument = async (documentId) => {
+    if (!documentId) return;
+
+    try {
+      const tokenNow = authService.getToken();
+      if (!tokenNow) {
+        throw new Error("You are not authenticated");
+      }
+
+      const res = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokenNow}`,
+        },
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+        throw new Error(
+          data.error || data.message || "Failed to delete document",
+        );
+      }
+
+      navigate("/");
+    } catch (e) {
+      setDeleteError(e.message || "Failed to delete document");
+    }
+  };
+
   return (
     <div style={{ width: "100%", maxWidth: 1000, padding: "0 1rem" }}>
       <div
@@ -263,6 +297,9 @@ export default function DocumentDetail() {
                 <div style={{ fontWeight: 700, color: "#2d3748" }}>
                   {document.filename.split(".")[0]}
                 </div>
+                <button onClick={() => handleDeleteDocument(document.id)}>
+                  Delete Document
+                </button>
                 <div style={{ color: "#4a5568", fontSize: "0.9rem" }}>
                   Created: {formatDate(document.createdAt)}
                 </div>
