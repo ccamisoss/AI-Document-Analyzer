@@ -137,7 +137,7 @@ const createAnalysis = async ({
 
 type GetAnalysesByDocumentIdInput = {
   userId: string;
-  documentId: string;
+  documentId: number;
 };
 
 const getAnalysesByDocumentId = async ({
@@ -170,7 +170,7 @@ const getAnalysesByDocumentId = async ({
 
 type DeleteAnalysisInput = {
   userId: string;
-  analysisId: string;
+  analysisId: number;
 };
 
 const deleteAnalysis = async ({

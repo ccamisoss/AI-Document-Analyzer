@@ -50,9 +50,17 @@ const deleteDocument = async (req: Request, res: Response) => {
       });
     }
 
+    const documentIdNum = Number(id);
+    if (!Number.isInteger(documentIdNum) || documentIdNum < 1) {
+      return res.status(400).json({
+        status: "warning",
+        message: "Document id must be a positive integer",
+      });
+    }
+
     const { deletedCount } = await deleteDocumentService({
       userId,
-      id,
+      id: documentIdNum,
     });
 
     if (deletedCount === 0) {
@@ -98,9 +106,17 @@ const getAnalysesByDocumentId = async (req: Request, res: Response) => {
       });
     }
 
+    const documentIdNum = Number(documentId);
+    if (!Number.isInteger(documentIdNum) || documentIdNum < 1) {
+      return res.status(400).json({
+        status: "warning",
+        message: "Document id must be a positive integer",
+      });
+    }
+
     const analyses = await getAnalysesByDocumentIdService({
       userId,
-      documentId,
+      documentId: documentIdNum,
     });
 
     if (!analyses) {

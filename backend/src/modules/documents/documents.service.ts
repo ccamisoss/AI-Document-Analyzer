@@ -94,7 +94,7 @@ const getDocuments = async ({ userId }: GetDocumentsInput) => {
 
 type DeleteDocumentInput = {
   userId: string;
-  id: string;
+  id: number;
 };
 
 const deleteDocument = async ({

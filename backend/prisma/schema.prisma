@@ -10,7 +10,7 @@ datasource db {
 
 // Document model: stores uploaded documents/text
 model Document {
-  id        String    @id @default(cuid())
+  id        Int    @id @default(autoincrement())
   userId    String?
   content   String // The text content of the document
   createdAt DateTime  @default(now())
@@ -27,8 +27,8 @@ model Document {
 
 // Analysis model: stores AI analysis results
 model Analysis {
-  id            String   @id @default(cuid())
-  documentId    String
+  id            Int   @id @default(autoincrement())
+  documentId    Int
   userPrompt    String?
   promptVersion String   @default("v1")
   result        Json   // Structured AI output

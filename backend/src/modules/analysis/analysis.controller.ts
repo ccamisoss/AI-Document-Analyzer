@@ -61,9 +61,17 @@ const deleteAnalysis = async (req: Request, res: Response) => {
       });
     }
 
+    const analysisIdNum = Number(analysisId);
+    if (!Number.isInteger(analysisIdNum) || analysisIdNum < 1) {
+      return res.status(400).json({
+        status: "warning",
+        message: "Analysis id must be a positive integer",
+      });
+    }
+
     const { deletedCount } = await deleteAnalysisService({
       userId,
-      analysisId,
+      analysisId: analysisIdNum,
     });
 
     if (deletedCount === 0) {
