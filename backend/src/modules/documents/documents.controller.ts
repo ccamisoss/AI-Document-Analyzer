@@ -58,12 +58,12 @@ const deleteDocument = async (req: Request, res: Response) => {
       });
     }
 
-    const { deletedCount } = await deleteDocumentService({
+    const { success } = await deleteDocumentService({
       userId,
       id: documentIdNum,
     });
 
-    if (deletedCount === 0) {
+    if (!success) {
       return res.status(404).json({
         status: "warning",
         message: "Document not found",
@@ -73,7 +73,6 @@ const deleteDocument = async (req: Request, res: Response) => {
     return res.status(200).json({
       status: "success",
       message: "Document deleted successfully",
-      data: { deletedCount },
     });
   } catch (error) {
     console.error("Delete document error:", error);

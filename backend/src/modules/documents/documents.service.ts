@@ -1,6 +1,12 @@
-import { DOMMatrix, ImageData, Path2D, DOMPoint, DOMRect } from "@napi-rs/canvas";
+import {
+  DOMMatrix,
+  ImageData,
+  Path2D,
+  DOMPoint,
+  DOMRect,
+} from "@napi-rs/canvas";
 import { prisma } from "../../db/client.js";
-import { readFile } from "node:fs/promises";
+import { readFile, unlink } from "node:fs/promises";
 
 // `pdf-parse` uses `pdfjs-dist` under the hood. `pdfjs-dist` expects browser globals
 // like `DOMMatrix` to exist. In Node, we provide them from `@napi-rs/canvas` before
@@ -12,7 +18,9 @@ import { readFile } from "node:fs/promises";
 (globalThis as any).DOMRect = DOMRect;
 
 let PDFParseCtor:
-  | (new (options: { data: Buffer }) => { getText: () => Promise<{ text?: string }> })
+  | (new (options: { data: Buffer }) => {
+      getText: () => Promise<{ text?: string }>;
+    })
   | undefined;
 
 const getPDFParseCtor = async () => {
@@ -63,7 +71,7 @@ const validatePdf = (file: Express.Multer.File): PdfValidationResult => {
 };
 
 const extractTextFromPdf = async (
-  file: Express.Multer.File
+  file: Express.Multer.File,
 ): Promise<string> => {
   try {
     const data = await getPdfFileData(file);
@@ -116,12 +124,33 @@ type DeleteDocumentInput = {
 const deleteDocument = async ({
   userId,
   id,
-}: DeleteDocumentInput): Promise<{ deletedCount: number }> => {
-  const result = await prisma.document.deleteMany({
-    where: { id, userId },
-  });
+}: DeleteDocumentInput): Promise<{ success: boolean }> => {
+  try {
+    const document = await prisma.document.findUnique({
+      where: { id, userId },
+    });
 
-  return { deletedCount: result.count };
+    if (!document) {
+      throw new Error("Document not found");
+    }
+
+    if (document.path) {
+      await unlink(document.path);
+    }
+
+    await prisma.analysis.deleteMany({
+      where: { documentId: id },
+    });
+
+    await prisma.document.delete({
+      where: { id, userId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete document error:", error);
+    throw new Error("Failed to delete document");
+  }
 };
 
 export const documentsService = {
@@ -129,8 +158,4 @@ export const documentsService = {
   deleteDocument,
 };
 
-export {
-  validatePdf,
-  extractTextFromPdf,
-  getPdfFileData,
-};
+export { validatePdf, extractTextFromPdf, getPdfFileData };
