@@ -133,7 +133,7 @@ export default function DocumentDetail() {
         }
 
         const found = (Array.isArray(docsJson.data) ? docsJson.data : []).find(
-          (d) => d.id === documentId,
+          (d) => String(d.id) === String(documentId),
         );
         setDocument(found || null);
 
@@ -275,31 +275,6 @@ export default function DocumentDetail() {
                 }}
               >
                 Updated: {formatDate(document.updatedAt)}
-              </div>
-            </div>
-
-            <div style={{ marginTop: "1rem" }}>
-              <div
-                style={{ fontWeight: 600, marginBottom: 6, color: "#2d3748" }}
-              >
-                Content (preview)
-              </div>
-              <div
-                style={{
-                  background: "#f7fafc",
-                  border: "1px solid #e2e8f0",
-                  padding: "0.75rem",
-                  borderRadius: 10,
-                  maxHeight: 200,
-                  overflow: "auto",
-                  whiteSpace: "pre-wrap",
-                  color: "#2d3748",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.4,
-                }}
-              >
-                {(document.content || "").slice(0, 1200)}
-                {(document.content || "").length > 1200 ? "..." : ""}
               </div>
             </div>
           </div>
