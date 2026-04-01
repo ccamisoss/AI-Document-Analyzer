@@ -97,7 +97,17 @@ function AnalyzeForm() {
             disabled={loading}
             className="file-input"
           />
-          {file && <p className="file-name">Selected file: {file.name}</p>}
+          {file && (
+            <>
+              <p className="file-name">Selected file: {file.name}</p>
+              <iframe
+                src={URL.createObjectURL(file)}
+                width="100%"
+                height="600px"
+                title="PDF Preview"
+              />
+            </>
+          )}
         </div>
 
         <div className="prompt-input-container">
