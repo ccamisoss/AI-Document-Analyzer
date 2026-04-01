@@ -1,19 +1,22 @@
 import { useState } from "react";
 import authService from "../services/auth.service";
 import "./Auth.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
-function Login({ setUser, setIsAuthenticated }) {
+function Login() {
+  const { login: setSession } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from ?? "/";
 
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    navigate("/");
+  const handleLoginSuccess = (userData, token) => {
+    setSession(userData, token);
+    navigate(from, { replace: true });
   };
 
   const handleSubmit = async (e) => {
@@ -24,10 +27,7 @@ function Login({ setUser, setIsAuthenticated }) {
     try {
       const result = await authService.login(email, password);
 
-      authService.saveToken(result.token);
-      authService.saveUser(result.user);
-
-      handleLoginSuccess(result.user);
+      handleLoginSuccess(result.user, result.token);
     } catch (err) {
       setError(err.message || "Error signing in");
     } finally {

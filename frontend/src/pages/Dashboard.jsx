@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import authService from '../services/auth.service';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import authService from "../services/auth.service";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,27 +11,12 @@ function formatDate(value) {
   return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
 }
 
-export default function Dashboard({setIsAuthenticated, setUser, isAuthenticated}) {
+export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = authService.getToken();
-    const savedUser = authService.getUser();
-
-    if (token && savedUser) {
-      setIsAuthenticated(true);
-      setUser(savedUser);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-  }, [isAuthenticated, navigate]);
+  const { logout } = useSession();
 
   useEffect(() => {
     const loadDocuments = async () => {
@@ -54,8 +40,7 @@ export default function Dashboard({setIsAuthenticated, setUser, isAuthenticated}
 
         if (!res.ok) {
           if (res.status === 401) {
-            authService.logout();
-            window.location.reload();
+            logout();
             return;
           }
           throw new Error(data.error || data.message || 'Failed to load documents');
@@ -70,7 +55,7 @@ export default function Dashboard({setIsAuthenticated, setUser, isAuthenticated}
     };
 
     loadDocuments();
-  }, []);
+  }, [logout]);
 
   const handleClickDocument = (documentId) => {
     navigate(`/documentDetail?id=${documentId}`);

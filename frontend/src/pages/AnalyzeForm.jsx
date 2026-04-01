@@ -1,7 +1,9 @@
 import { useState } from "react";
 import authService from "../services/auth.service";
+import { useSession } from "../hooks/useSession";
 
 function AnalyzeForm() {
+  const { logout } = useSession();
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +64,7 @@ function AnalyzeForm() {
 
       if (!fetchResponse.ok) {
         if (fetchResponse.status === 401) {
-          handleLogout();
+          logout();
           throw new Error("Session expired. Please log in again.");
         }
         throw new Error(

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -93,6 +94,7 @@ export default function DocumentDetail() {
   const [deleteError, setDeleteError] = useState(null);
   const [deletingAnalysisId, setDeletingAnalysisId] = useState(null);
   const navigate = useNavigate();
+  const { logout } = useSession();
   const params = new URLSearchParams(window.location.search);
   const documentId = params.get("id");
   const token = useMemo(() => authService.getToken(), []);
@@ -120,8 +122,7 @@ export default function DocumentDetail() {
         ]);
 
         if (docsRes.status === 401 || analysesRes.status === 401) {
-          authService.logout();
-          window.location.reload();
+          logout();
           return;
         }
 
@@ -156,7 +157,7 @@ export default function DocumentDetail() {
     };
 
     if (documentId) load();
-  }, [documentId, token]);
+  }, [documentId, token, logout]);
 
   useEffect(() => {
     setExpandedAnalysisId(null);
@@ -187,8 +188,7 @@ export default function DocumentDetail() {
 
       if (!res.ok) {
         if (res.status === 401) {
-          authService.logout();
-          window.location.reload();
+          logout();
           return;
         }
         throw new Error(

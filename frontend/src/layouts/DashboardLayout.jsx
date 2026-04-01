@@ -1,15 +1,8 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import authService from "../services/auth.service";
+import { Outlet, Link } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
-function DashboardLayout({ setIsAuthenticated, setUser, user }) {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    authService.logout();
-    setIsAuthenticated(false);
-    setUser(null);
-    navigate("/login");
-  };
+function DashboardLayout() {
+  const { user, logout } = useSession();
 
   return (
     <div className="app-container">
@@ -59,7 +52,7 @@ function DashboardLayout({ setIsAuthenticated, setUser, user }) {
             Analyze
           </Link>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             style={{
               padding: "0.5rem 1rem",
               background: "#e53e3e",

@@ -1,20 +1,22 @@
 import { useState } from "react";
 import authService from "../services/auth.service";
 import "./Auth.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
-function Register({ setUser, setIsAuthenticated, setShowRegister }) {
+function Register() {
+  const { login: setSession } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from ?? "/";
 
-  const handleRegisterSuccess = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    setShowRegister(false);
-    navigate("/");
+  const handleRegisterSuccess = (userData, token) => {
+    setSession(userData, token);
+    navigate(from, { replace: true });
   };
 
   const handleSubmit = async (e) => {
@@ -25,10 +27,7 @@ function Register({ setUser, setIsAuthenticated, setShowRegister }) {
     try {
       const result = await authService.register(email, password);
 
-      authService.saveToken(result.token);
-      authService.saveUser(result.user);
-
-      handleRegisterSuccess(result.user);
+      handleRegisterSuccess(result.user, result.token);
     } catch (err) {
       setError(err.message || "Error registering user");
     } finally {

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 
@@ -8,49 +7,37 @@ import AnalyzeForm from "./pages/AnalyzeForm";
 import Dashboard from "./pages/Dashboard";
 import DocumentDetail from "./pages/DocumentDetail";
 import AuthPage from "./pages/AuthPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import GuestRoute from "./components/GuestRoute";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
   return (
     <Routes>
       <Route
         path="/login"
         element={
-          <AuthPage setUser={setUser} setIsAuthenticated={setIsAuthenticated} />
+          <GuestRoute>
+            <AuthPage />
+          </GuestRoute>
         }
       />
       <Route
         path="/register"
         element={
-          <AuthPage
-            showRegister={true}
-            setUser={setUser}
-            setIsAuthenticated={setIsAuthenticated}
-          />
+          <GuestRoute>
+            <AuthPage />
+          </GuestRoute>
         }
       />
       <Route
         path="/"
         element={
-          <DashboardLayout
-            setIsAuthenticated={setIsAuthenticated}
-            setUser={setUser}
-            user={user}
-          />
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
         }
       >
-        <Route
-          index
-          element={
-            <Dashboard
-              setIsAuthenticated={setIsAuthenticated}
-              setUser={setUser}
-              isAuthenticated={isAuthenticated}
-            />
-          }
-        />
+        <Route index element={<Dashboard />} />
         <Route path="/documentDetail" element={<DocumentDetail />} />
         <Route path="/analyze" element={<AnalyzeForm />} />
       </Route>
