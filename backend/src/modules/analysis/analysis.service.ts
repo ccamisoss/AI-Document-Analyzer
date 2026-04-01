@@ -1,11 +1,13 @@
 import {
   validatePdf,
   extractTextFromPdf,
+  getPdfFileData,
 } from "../documents/documents.service.js";
 import { buildPrompt } from "../ai/prompt.builder.js";
 import { generateCompletion } from "../ai/llm.provider.js";
 import { prisma } from "../../db/client.js";
 import crypto from "crypto";
+import { unlink } from "node:fs/promises";
 
 const generateDocumentHash = (buffer: Buffer) => {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -15,6 +17,21 @@ type CreateAnalysisInput = {
   userId: string;
   file: Express.Multer.File;
   userPrompt?: string;
+};
+
+const cleanupUploadedFile = async (file: Express.Multer.File) => {
+  // For diskStorage uploads, remove temporary files we don't need to keep.
+  if (!file.path || file.buffer?.length) {
+    return;
+  }
+
+  try {
+    await unlink(file.path);
+  } catch (error: any) {
+    if (error?.code !== "ENOENT") {
+      console.warn("Failed to remove uploaded file:", error);
+    }
+  }
 };
 
 const createAnalysis = async ({
@@ -36,6 +53,7 @@ const createAnalysis = async ({
   try {
     documentText = await extractTextFromPdf(file);
   } catch (error) {
+    await cleanupUploadedFile(file);
     console.error("PDF extraction error:", error);
     return {
       status: "error",
@@ -48,13 +66,15 @@ const createAnalysis = async ({
     .trim();
 
   if (!cleanedText) {
+    await cleanupUploadedFile(file);
     return {
       status: "warning",
       message: "The document contains no readable text",
     };
   }
 
-  const fileHash = generateDocumentHash(file.buffer);
+  const fileData = await getPdfFileData(file);
+  const fileHash = generateDocumentHash(fileData);
 
   let document = await prisma.document.findFirst({
     where: {
@@ -69,8 +89,12 @@ const createAnalysis = async ({
         userId,
         content: documentText,
         hash: fileHash,
+        filename: file.originalname,
+        path: file.path,
       },
     });
+  } else {
+    await cleanupUploadedFile(file);
   }
 
   const promptResult = buildPrompt(

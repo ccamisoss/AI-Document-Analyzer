@@ -5,9 +5,15 @@ import { createAnalysis, deleteAnalysis } from "./analysis.controller.js";
 
 const analysisRouter = Router();
 
-const upload = multer({
-  storage: multer.memoryStorage()
+const storage = multer.diskStorage({
+  destination: "uploads",
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  },
 });
+
+export const upload = multer({ storage });
 
 analysisRouter.post("/", authenticate, upload.single("file"), createAnalysis);
 analysisRouter.delete("/:id", authenticate, deleteAnalysis);

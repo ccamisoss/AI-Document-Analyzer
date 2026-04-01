@@ -1,5 +1,6 @@
 import { DOMMatrix, ImageData, Path2D, DOMPoint, DOMRect } from "@napi-rs/canvas";
 import { prisma } from "../../db/client.js";
+import { readFile } from "node:fs/promises";
 
 // `pdf-parse` uses `pdfjs-dist` under the hood. `pdfjs-dist` expects browser globals
 // like `DOMMatrix` to exist. In Node, we provide them from `@napi-rs/canvas` before
@@ -65,14 +66,27 @@ const extractTextFromPdf = async (
   file: Express.Multer.File
 ): Promise<string> => {
   try {
+    const data = await getPdfFileData(file);
     const PDFParse = await getPDFParseCtor();
-    const parser = new PDFParse({ data: file.buffer });
+    const parser = new PDFParse({ data });
     const result = await parser.getText();
     return result.text || "";
   } catch (error) {
     console.error("PDF parsing failed:", error);
     throw new Error("PDF_TEXT_EXTRACTION_FAILED");
   }
+};
+
+const getPdfFileData = async (file: Express.Multer.File): Promise<Buffer> => {
+  if (file.buffer?.length) {
+    return file.buffer;
+  }
+
+  if (file.path) {
+    return readFile(file.path);
+  }
+
+  throw new Error("PDF_FILE_DATA_UNAVAILABLE");
 };
 
 type GetDocumentsInput = {
@@ -88,6 +102,8 @@ const getDocuments = async ({ userId }: GetDocumentsInput) => {
       content: true,
       createdAt: true,
       updatedAt: true,
+      filename: true,
+      path: true,
     },
   });
 };
@@ -116,4 +132,5 @@ export const documentsService = {
 export {
   validatePdf,
   extractTextFromPdf,
+  getPdfFileData,
 };
