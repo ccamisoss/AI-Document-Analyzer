@@ -2,7 +2,6 @@ import {
   validatePdf,
   extractTextFromPdf,
   getPdfFileData,
-  documentsService,
 } from "../documents/documents.service.js";
 import { buildPrompt } from "../ai/prompt.builder.js";
 import { generateCompletion } from "../ai/llm.provider.js";
@@ -198,19 +197,11 @@ type DeleteAnalysisInput = {
   analysisId: number;
 };
 
-type DeleteAnalysisResult = {
-  success: boolean;
-  deletedDocument: boolean;
-  error?: string;
-};
-
 const deleteAnalysis = async ({
   userId,
   analysisId,
-}: DeleteAnalysisInput): Promise<DeleteAnalysisResult> => {
-  let response: DeleteAnalysisResult = { success: true, deletedDocument: false };
-
-  const analysis = await prisma.analysis.findFirst({
+}: DeleteAnalysisInput): Promise<{ deletedCount: number }> => {
+  const result = await prisma.analysis.deleteMany({
     where: {
       id: analysisId,
       document: {
@@ -219,44 +210,7 @@ const deleteAnalysis = async ({
     },
   });
 
-  if (!analysis) {
-    response.success = false;
-    response.error = "Analysis not found";
-    return response;
-  }
-
-  await prisma.analysis.delete({
-    where: {
-      id: analysisId,
-    },
-  });
-
-  const remainingAnalyses = await prisma.analysis.count({
-    where: {
-      documentId: analysis.documentId,
-    },
-  });
-
-  if (remainingAnalyses === 0) {
-    const document = await prisma.document.findUnique({
-      where: {
-        id: analysis.documentId,
-      },
-    });
-
-    if (!document) {
-      throw new Error("Document not found");
-    }
-
-    await documentsService.deleteDocument({
-      userId,
-      id: document.id,
-    });
-
-    response.deletedDocument = true;
-  }
-
-  return response;
+  return { deletedCount: result.count };
 };
 
 export const analysisService = {
