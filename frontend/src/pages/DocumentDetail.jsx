@@ -94,7 +94,7 @@ export default function DocumentDetail() {
   const [deletingAnalysisId, setDeletingAnalysisId] = useState(null);
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
-  const documentId = params.get("id")
+  const documentId = params.get("id");
   const token = useMemo(() => authService.getToken(), []);
 
   useEffect(() => {
@@ -261,7 +261,7 @@ export default function DocumentDetail() {
             >
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 700, color: "#2d3748" }}>
-                  Document {document.id}
+                  {document.filename.split(".")[0]}
                 </div>
                 <div style={{ color: "#4a5568", fontSize: "0.9rem" }}>
                   Created: {formatDate(document.createdAt)}
@@ -276,6 +276,11 @@ export default function DocumentDetail() {
               >
                 Updated: {formatDate(document.updatedAt)}
               </div>
+              <iframe
+                src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+                width="100%"
+                height="600px"
+              />
             </div>
           </div>
 
