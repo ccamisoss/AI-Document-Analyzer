@@ -69,22 +69,22 @@ const deleteAnalysis = async (req: Request, res: Response) => {
       });
     }
 
-    const { deletedCount } = await deleteAnalysisService({
+    const { success, deletedDocument, error } = await deleteAnalysisService({
       userId,
       analysisId: analysisIdNum,
     });
 
-    if (deletedCount === 0) {
+    if (!success) {
       return res.status(404).json({
         status: "warning",
-        message: "Analysis not found",
+        message: error || "Analysis not found",
       });
     }
 
     return res.status(200).json({
       status: "success",
       message: "Analysis deleted successfully",
-      data: { deletedCount },
+      deletedDocument,
     });
   } catch (error) {
     console.error("Delete analysis error:", error);
