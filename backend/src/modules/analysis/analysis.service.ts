@@ -13,7 +13,7 @@ const generateDocumentHash = (buffer: Buffer) => {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 };
 
-type CreateAnalysisInput = {
+type CreateAnalysisAndDocumentInput = {
   userId: string;
   file: Express.Multer.File;
   userPrompt?: string;
@@ -34,11 +34,11 @@ const cleanupUploadedFile = async (file: Express.Multer.File) => {
   }
 };
 
-const createAnalysis = async ({
+const createAnalysisAndDocument = async ({
   userId,
   file,
   userPrompt,
-}: CreateAnalysisInput) => {
+}: CreateAnalysisAndDocumentInput) => {
   const validation = validatePdf(file);
 
   if (!validation.valid) {
@@ -155,7 +155,10 @@ const createAnalysis = async ({
 
   return {
     status: "success",
-    data: analysis.result,
+    data: {
+      analysis: analysis.result,
+      document: document,
+    },
   };
 };
 
@@ -213,7 +216,101 @@ const deleteAnalysis = async ({
   return { deletedCount: result.count };
 };
 
+type CreateAnalysisInput = {
+  userId: string;
+  documentId: number;
+  userPrompt?: string;
+};
+
+const createAnalysis = async ({
+  userId,
+  documentId,
+  userPrompt,
+}: CreateAnalysisInput) => {
+
+  let document = await prisma.document.findFirst({
+    where: {
+      userId,
+      id: documentId,
+    },
+  });
+
+  if (!document) {
+    return {
+      status: "error",
+      message: "Document not found",
+    };
+  }
+
+  const promptResult = buildPrompt(
+    userPrompt !== undefined
+      ? { documentText: document.content, userPrompt }
+      : { documentText: document.content },
+  );
+
+  const {
+    system: systemPrompt,
+    user: finalUserPrompt,
+    version: promptVersion,
+  } = promptResult;
+
+  let rawResponse: string;
+
+  try {
+    rawResponse = await generateCompletion({
+      systemPrompt,
+      userPrompt: finalUserPrompt,
+    });
+  } catch (error) {
+    console.error("LLM call error:", error);
+    return {
+      status: "error",
+      message: "AI service failed to generate a response",
+    };
+  }
+
+  let aiResult: any;
+
+  try {
+    aiResult = JSON.parse(rawResponse);
+  } catch {
+    return {
+      status: "error",
+      message: "AI returned malformed JSON",
+    };
+  }
+
+  if (
+    typeof aiResult.summary !== "string" ||
+    !Array.isArray(aiResult.keyPoints) ||
+    !Array.isArray(aiResult.insights)
+  ) {
+    return {
+      status: "error",
+      message: "Invalid AI response structure",
+    };
+  }
+
+  const analysis = await prisma.analysis.create({
+    data: {
+      documentId: document.id,
+      ...(userPrompt && { userPrompt }),
+      promptVersion,
+      result: aiResult,
+    },
+  });
+
+  return {
+    status: "success",
+    data: {
+      analysis: analysis.result,
+      document,
+    },
+  };
+};
+
 export const analysisService = {
+  createAnalysisAndDocument,
   createAnalysis,
   getAnalysesByDocumentId,
   deleteAnalysis,
