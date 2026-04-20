@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import authService from "../services/auth.service";
 import { useSession } from "../hooks/useSession";
+import { useLocation } from "react-router-dom";
 
 function AnalyzeForm() {
   const { logout } = useSession();
@@ -9,6 +10,9 @@ function AnalyzeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
+  const state = useLocation().state;
+  const [document, setDocument] = useState(state?.document || null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -28,7 +32,7 @@ function AnalyzeForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!file) {
+    if (!file && !document) {
       setError("Please select a PDF file");
       return;
     }
@@ -43,22 +47,32 @@ function AnalyzeForm() {
         throw new Error("You are not authenticated");
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-      if (prompt.trim()) {
-        formData.append("prompt", prompt.trim());
+      let body = null;
+      let headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      let url = null;
+
+      if (document) {
+        body = JSON.stringify({ prompt: prompt.trim() });
+        headers["Content-Type"] = "application/json";
+        url = `${API_BASE_URL}/documents/${document.id}/analyses`;
+      } else {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (prompt.trim()) {
+          formData.append("prompt", prompt.trim());
+        }
+        body = formData;
+        headers["Content-Type"] = "multipart/form-data";
+        url = `${API_BASE_URL}/analysis`;
       }
 
-      const fetchResponse = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/analysis`,
-        {
-          method: "POST",
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const fetchResponse = await fetch(url, {
+        method: "POST",
+        body: body,
+        headers: headers,
+      });
 
       const data = await fetchResponse.json();
 
@@ -88,28 +102,39 @@ function AnalyzeForm() {
       <form onSubmit={handleSubmit} className="upload-form">
         <h1>Document Analyzer</h1>
         <div className="file-input-container">
-          <label htmlFor="pdf-file" className="file-label">
-            Select PDF file
-          </label>
-          <input
-            id="pdf-file"
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileChange}
-            disabled={loading}
-            className="file-input"
-          />
-          {file && (
+          {!document && (
             <>
-              <p className="file-name">Selected file: {file.name}</p>
-              <iframe
-                src={URL.createObjectURL(file)}
-                width="100%"
-                height="600px"
-                title="PDF Preview"
+              <label htmlFor="pdf-file" className="file-label">
+                Select PDF file
+              </label>
+              <input
+                id="pdf-file"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                disabled={loading}
+                className="file-input"
               />
             </>
           )}
+          {file ||
+            (document && (
+              <>
+                <p className="file-name">
+                  Selected file: {file?.name || document?.filename}
+                </p>
+                <iframe
+                  src={
+                    document
+                      ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
+                      : URL.createObjectURL(file)
+                  }
+                  width="100%"
+                  height="600px"
+                  title="PDF Preview"
+                />
+              </>
+            ))}
         </div>
 
         <div className="prompt-input-container">
@@ -129,7 +154,7 @@ function AnalyzeForm() {
 
         <button
           type="submit"
-          disabled={loading || !file}
+          disabled={loading || (!file && !document)}
           className="submit-button"
         >
           {loading ? "Analyzing..." : "Analyze"}

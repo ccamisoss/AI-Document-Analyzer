@@ -323,6 +323,11 @@ export default function DocumentDetail() {
 
           <div style={{ marginTop: "2rem" }}>
             <h2 style={{ margin: "0 0 1rem", color: "white" }}>Analyses</h2>
+            <button
+              onClick={() => navigate("/analyze", { state: { document } })}
+            >
+              Generate New Analysis
+            </button>
 
             {analyses.length === 0 && (
               <p style={{ color: "white" }}>No analyses yet.</p>
