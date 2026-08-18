@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import authService from "../services/auth.service";
 import { useSession } from "../hooks/useSession";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+/** Solo para probar UI con análisis lento; quitar cuando termines de testear */
+const TEST_REDIRECT_DELAY_MS = 3_000;
 
 function AnalyzeForm() {
   const { logout } = useSession();
@@ -9,10 +12,9 @@ function AnalyzeForm() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [response, setResponse] = useState(null);
   const state = useLocation().state;
   const [document, setDocument] = useState(state?.document || null);
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -23,8 +25,8 @@ function AnalyzeForm() {
         return;
       }
       setFile(selectedFile);
+      setDocument(null);
       setError(null);
-      setResponse(null);
       setPrompt("");
     }
   };
@@ -39,7 +41,6 @@ function AnalyzeForm() {
 
     setLoading(true);
     setError(null);
-    setResponse(null);
 
     try {
       const token = authService.getToken();
@@ -64,7 +65,6 @@ function AnalyzeForm() {
           formData.append("prompt", prompt.trim());
         }
         body = formData;
-        headers["Content-Type"] = "multipart/form-data";
         url = `${API_BASE_URL}/analysis`;
       }
 
@@ -86,7 +86,11 @@ function AnalyzeForm() {
         );
       }
 
-      setResponse(data);
+      await new Promise((resolve) =>
+        setTimeout(resolve, TEST_REDIRECT_DELAY_MS),
+      );
+
+      navigate(`/documentDetail?id=${data.data.document.id}`);
       setFile(null);
       setPrompt("");
       e.target.reset();
@@ -99,42 +103,42 @@ function AnalyzeForm() {
 
   return (
     <>
+      {loading && <div>Analizing document...</div>}
       <form onSubmit={handleSubmit} className="upload-form">
         <h1>Document Analyzer</h1>
         <div className="file-input-container">
-          {!document && (
+          {(file || document) && (
             <>
-              <label htmlFor="pdf-file" className="file-label">
-                Select PDF file
-              </label>
-              <input
-                id="pdf-file"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                disabled={loading}
-                className="file-input"
+              <p className="file-name">
+                Selected file: {file?.name || document?.filename}
+              </p>
+              <iframe
+                src={
+                  document
+                    ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
+                    : URL.createObjectURL(file)
+                }
+                width="100%"
+                height="600px"
+                title="PDF Preview"
               />
             </>
           )}
-          {file ||
-            (document && (
-              <>
-                <p className="file-name">
-                  Selected file: {file?.name || document?.filename}
-                </p>
-                <iframe
-                  src={
-                    document
-                      ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
-                      : URL.createObjectURL(file)
-                  }
-                  width="100%"
-                  height="600px"
-                  title="PDF Preview"
-                />
-              </>
-            ))}
+
+          <>
+            <label for="pdf-file" htmlFor="pdf-file" className="file-label">
+              Upload a new document
+            </label>
+            <input
+              id="pdf-file"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              disabled={loading}
+              className="file-input"
+              placeholder="Select a PDF file"
+            />
+          </>
         </div>
 
         <div className="prompt-input-container">
@@ -162,87 +166,8 @@ function AnalyzeForm() {
       </form>
 
       {error && <div className="error-message">{error}</div>}
-      {response && <ResponsePanel response={response} />}
     </>
   );
-}
-
-function ResponsePanel({ response }) {
-  if (response.status === "warning" || response.status === "error") {
-    return (
-      <div
-        className={`response-panel ${response.status === "warning" ? "warning-message" : "error-message"}`}
-      >
-        <h3 className="response-title">
-          {response.status === "warning" ? "Warning" : "Error"}
-        </h3>
-        <p>{response.message}</p>
-      </div>
-    );
-  }
-
-  if (response.status === "success" && response.data) {
-    const { summary, keyPoints, insights, notes, answers } = response.data;
-
-    return (
-      <div className="response-panel success-panel">
-        <h2 className="response-title">Analysis Results</h2>
-
-        {summary && summary.trim() && (
-          <section className="response-section">
-            <h3 className="section-title">Summary</h3>
-            <div className="summary-text">
-              {summary.split("\n").map((line, idx) => (
-                <p key={idx}>{line || "\u00A0"}</p>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {keyPoints && keyPoints.length > 0 && (
-          <section className="response-section">
-            <h3 className="section-title">Key Points</h3>
-            <ul className="bullet-list">
-              {keyPoints.map((point, idx) => (
-                <li key={idx}>{point}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {insights && insights.length > 0 && (
-          <section className="response-section">
-            <h3 className="section-title">Insights</h3>
-            <ul className="bullet-list">
-              {insights.map((insight, idx) => (
-                <li key={idx}>{insight}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {notes && notes.trim() && (
-          <section className="response-section">
-            <h3 className="section-title">Notes</h3>
-            <p className="notes-text">{notes}</p>
-          </section>
-        )}
-
-        {answers && answers.length > 0 && (
-          <section className="response-section">
-            <h3 className="section-title">Answers</h3>
-            <ol className="numbered-list">
-              {answers.map((answer, idx) => (
-                <li key={idx}>{answer}</li>
-              ))}
-            </ol>
-          </section>
-        )}
-      </div>
-    );
-  }
-
-  return null;
 }
 
 export default AnalyzeForm;
