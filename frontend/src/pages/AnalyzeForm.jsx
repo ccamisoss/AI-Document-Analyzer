@@ -102,10 +102,22 @@ function AnalyzeForm() {
   };
 
   return (
-    <>
+    <div
+      style={{
+        padding: "0 1rem",
+        height: "100%",
+        overflow: "auto",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+      }}
+    >
       {loading && <div>Analizing document...</div>}
+      <h1 style={{ margin: "1.5rem 0 1rem", color: "white" }}>
+        Document Analyzer
+      </h1>
       <form onSubmit={handleSubmit} className="upload-form">
-        <h1>Document Analyzer</h1>
         <div className="file-input-container">
           {(file || document) && (
             <>
@@ -127,7 +139,7 @@ function AnalyzeForm() {
 
           <>
             <label for="pdf-file" htmlFor="pdf-file" className="file-label">
-              Upload a new document
+              Document Upload
             </label>
             <input
               id="pdf-file"
@@ -143,7 +155,7 @@ function AnalyzeForm() {
 
         <div className="prompt-input-container">
           <label htmlFor="prompt" className="prompt-label">
-            Optional prompt (to guide the analysis)
+            Prompt
           </label>
           <textarea
             id="prompt"
@@ -166,7 +178,7 @@ function AnalyzeForm() {
       </form>
 
       {error && <div className="error-message">{error}</div>}
-    </>
+    </div>
   );
 }
 

@@ -1,5 +1,19 @@
 import { Outlet, Link } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+import LogoutIcon from "@mui/icons-material/Logout";
+
+const buttonStyle = {
+  padding: "0.5rem 1rem",
+  background: "#f1f5f9",
+  color: "#1a202c",
+  border: "none",
+  borderRadius: 5,
+  cursor: "pointer",
+  fontSize: "0.875rem",
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5rem",
+};
 
 function DashboardLayout() {
   const { user, logout } = useSession();
@@ -9,60 +23,38 @@ function DashboardLayout() {
       <div
         style={{
           backgroundColor: "white",
-          padding: "1rem",
-          width: "100%",
+          height: "100%",
           display: "flex",
+          flexDirection: "column",
           justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "2rem",
-          gap: "1rem",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ color: "#4a5568" }}>{user?.email}</span>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <Link
-            to={"/"}
-            style={{
-              padding: "0.5rem 1rem",
-              background: "#f1f5f9",
-              color: "#1a202c",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-            }}
-          >
+        <div
+          style={{ display: "flex", gap: "0.75rem", flexDirection: "column" }}
+        >
+          <Link to={"/"} style={buttonStyle}>
             Dashboard
           </Link>
-          <Link
-            to={"/analyze"}
-            style={{
-              padding: "0.5rem 1rem",
-              background: "#f1f5f9",
-              color: "#1a202c",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-            }}
-          >
+          <Link to={"/analyze"} style={buttonStyle}>
             Analyze
           </Link>
-          <button
-            onClick={logout}
+        </div>
+
+        <div
+          style={{ display: "flex", gap: "0.75rem", flexDirection: "column" }}
+        >
+          <span
             style={{
-              padding: "0.5rem 1rem",
-              background: "#e53e3e",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
+              color: "#4a5568",
               fontSize: "0.875rem",
+              paddingInline: "8px",
             }}
           >
+            {user?.email}
+          </span>
+
+          <button onClick={logout} style={buttonStyle}>
+            <LogoutIcon />
             Logout
           </button>
         </div>

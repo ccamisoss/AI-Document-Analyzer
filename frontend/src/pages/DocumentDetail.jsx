@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -240,33 +241,37 @@ export default function DocumentDetail() {
   };
 
   return (
-    <div style={{ width: "100%", maxWidth: 1000, padding: "0 1rem" }}>
+    <div
+      style={{
+        padding: "0 1rem",
+        height: "100%",
+        overflow: "auto",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+      }}
+    >
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "1rem",
-          marginTop: "1rem",
+          margin: "1.5rem 0 1rem",
         }}
       >
         <button
           onClick={() => navigate("/")}
           style={{
-            padding: "0.5rem 1rem",
-            background: "white",
             border: "none",
-            borderRadius: 10,
+            background: "transparent",
             cursor: "pointer",
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
           }}
         >
-          Back to Dashboard
+          <KeyboardBackspaceIcon />
         </button>
+        <h1 style={{ color: "white" }}>Document Detail</h1>
       </div>
-
-      <h1 style={{ margin: "1.5rem 0 1rem", color: "white" }}>
-        Document Detail
-      </h1>
 
       {loading && <p style={{ color: "white" }}>Loading...</p>}
       {error && <p style={{ color: "white" }}>{error}</p>}
@@ -280,7 +285,7 @@ export default function DocumentDetail() {
           <div
             style={{
               background: "white",
-              borderRadius: 12,
+              borderRadius: 5,
               padding: "1rem",
               width: "100%",
               boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
@@ -338,7 +343,7 @@ export default function DocumentDetail() {
                 key={analysis.id || idx}
                 style={{
                   background: "white",
-                  borderRadius: 12,
+                  borderRadius: 5,
                   padding: "1rem",
                   width: "100%",
                   boxShadow: "0 10px 25px rgba(0, 0, 0, 0.06)",
@@ -450,7 +455,7 @@ export default function DocumentDetail() {
                                     : "#e53e3e",
                                 color: "white",
                                 border: "none",
-                                borderRadius: 8,
+                                borderRadius: 5,
                                 cursor:
                                   !analysis.id ||
                                   deletingAnalysisId === analysis.id
@@ -511,7 +516,7 @@ export default function DocumentDetail() {
                             background: "#f7fafc",
                             border: "1px solid #e2e8f0",
                             padding: "0.75rem",
-                            borderRadius: 10,
+                            borderRadius: 5,
                             color: "#2d3748",
                             whiteSpace: "pre-wrap",
                             fontSize: "0.9rem",
