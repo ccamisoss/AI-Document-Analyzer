@@ -3,7 +3,6 @@ import authService from "../services/auth.service";
 import { useSession } from "../hooks/useSession";
 import { useLocation, useNavigate } from "react-router-dom";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-/** Solo para probar UI con análisis lento; quitar cuando termines de testear */
 const TEST_REDIRECT_DELAY_MS = 3_000;
 
 function AnalyzeForm() {
@@ -118,26 +117,30 @@ function AnalyzeForm() {
         Document Analyzer
       </h1>
       <form onSubmit={handleSubmit} className="upload-form">
-        <div className="file-input-container">
-          {(file || document) && (
-            <>
-              <p className="file-name">
-                Selected file: {file?.name || document?.filename}
-              </p>
-              <iframe
-                src={
-                  document
-                    ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
-                    : URL.createObjectURL(file)
-                }
-                width="100%"
-                height="600px"
-                title="PDF Preview"
-              />
-            </>
-          )}
-
-          <>
+        {(file || document) && (
+          <div style={{ flex: 1 }}>
+            <iframe
+              src={
+                document
+                  ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
+                  : URL.createObjectURL(file)
+              }
+              width="100%"
+              height="100%"
+              title="PDF Preview"
+            />
+          </div>
+        )}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.5rem",
+            width: "50%",
+            padding: "1rem",
+          }}
+        >
+          <div className="file-input-container">
             <label for="pdf-file" htmlFor="pdf-file" className="file-label">
               Document Upload
             </label>
@@ -150,31 +153,31 @@ function AnalyzeForm() {
               className="file-input"
               placeholder="Select a PDF file"
             />
-          </>
-        </div>
+          </div>
 
-        <div className="prompt-input-container">
-          <label htmlFor="prompt" className="prompt-label">
-            Prompt
-          </label>
-          <textarea
-            id="prompt"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            disabled={loading}
-            className="prompt-textarea"
-            placeholder="Enter an optional prompt to guide the analysis or ask questions about the document..."
-            rows={4}
-          />
-        </div>
+          <div className="prompt-input-container">
+            <label htmlFor="prompt" className="prompt-label">
+              Prompt
+            </label>
+            <textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={loading}
+              className="prompt-textarea"
+              placeholder="Enter an optional prompt to guide the analysis or ask questions about the document..."
+              rows={4}
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading || (!file && !document)}
-          className="submit-button"
-        >
-          {loading ? "Analyzing..." : "Analyze"}
-        </button>
+          <button
+            type="submit"
+            disabled={loading || (!file && !document)}
+            className="submit-button"
+          >
+            {loading ? "Analyzing..." : "Analyze"}
+          </button>
+        </div>
       </form>
 
       {error && <div className="error-message">{error}</div>}
