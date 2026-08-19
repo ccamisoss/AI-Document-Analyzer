@@ -9,11 +9,11 @@ export default function AuthPage() {
   const authNavState = { state: location.state };
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {showRegister ? <Register /> : <Login />}
-      <div style={{ textAlign: "center", marginTop: "1rem" }}>
+      <div style={{ textAlign: "center" }}>
         {showRegister ? (
-          <p>
+          <p style={{ margin: 0 }}>
             Already have an account?{" "}
             <button
               type="button"
@@ -29,7 +29,7 @@ export default function AuthPage() {
             </button>
           </p>
         ) : (
-          <p>
+          <p style={{ margin: 0 }}>
             Don&apos;t have an account?{" "}
             <button
               type="button"

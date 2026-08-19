@@ -7,6 +7,10 @@ body,
   font-family: "Raleway", sans-serif;
 }
 
+button:focus {
+  outline: none;
+}
+
 h1 {
   font-weight: 600;
 }
@@ -17,8 +21,7 @@ h1 {
   flex-direction: row;
   height: 100%;
   align-items: center;
-  background: #b43a40;
-  background: linear-gradient(90deg, rgb(58, 72, 180) 0%, rgb(63, 29, 253) 50%, rgb(136, 69, 252) 100%);
+  background: linear-gradient(135deg, #667eea 0%, #4b81a2 100%);
 }
 
 .app-container h1 {
