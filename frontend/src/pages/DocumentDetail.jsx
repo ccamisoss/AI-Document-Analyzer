@@ -2,14 +2,24 @@ import { useEffect, useMemo, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import DeleteIcon from "@mui/icons-material/Delete";
+import UpdateIcon from "@mui/icons-material/Update";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function formatDate(value) {
   if (!value) return "";
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+  return d.toLocaleString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function AnalysisResultRenderer({ result }) {
@@ -245,94 +255,178 @@ export default function DocumentDetail() {
       style={{
         padding: "0 1rem",
         height: "100%",
+        minHeight: 0,
+        alignSelf: "stretch",
         overflow: "auto",
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
+        boxSizing: "border-box",
       }}
     >
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           gap: "1rem",
-          margin: "1.5rem 0 1rem",
+          minHeight: "100%",
+          flexShrink: 0,
+          boxSizing: "border-box",
+          paddingBottom: "1rem",
         }}
       >
-        <button
-          onClick={() => navigate("/")}
+        {/* Header */}
+        <div
           style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            margin: "1.5rem 0 0",
+            flexShrink: 0,
           }}
         >
-          <KeyboardBackspaceIcon sx={{ fill: "white" }}/>
-        </button>
-        <h1 style={{ color: "white" }}>Document Detail</h1>
-      </div>
+          <button
+            onClick={() => navigate("/")}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+            }}
+          >
+            <KeyboardBackspaceIcon sx={{ fill: "white" }} />
+          </button>
+          <h1 style={{ color: "white" }}>Document Detail</h1>
+        </div>
 
-      {loading && <p style={{ color: "white" }}>Loading...</p>}
-      {error && <p style={{ color: "white" }}>{error}</p>}
+        {/* Loading and error messages */}
+        {loading && <p style={{ color: "white" }}>Loading...</p>}
+        {error && <p style={{ color: "white" }}>{error}</p>}
+        {!loading && !error && !document && (
+          <p style={{ color: "white" }}>Document not found.</p>
+        )}
 
-      {!loading && !error && !document && (
-        <p style={{ color: "white" }}>Document not found.</p>
-      )}
-
-      {!loading && !error && document && (
-        <>
+        {/* Document Preview */}
+        {!loading && !error && document && (
           <div
             style={{
               background: "white",
               borderRadius: 5,
-              padding: "1rem",
               width: "100%",
               boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
+              display: "flex",
+              flexDirection: "row",
+              flex: 1,
+              minHeight: 0,
+              overflow: "hidden",
             }}
           >
+            <iframe
+              src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                height: "100%",
+                border: "none",
+                borderTopLeftRadius: "5px",
+                borderBottomLeftRadius: "5px",
+              }}
+              title="PDF Preview"
+            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                width: "50%",
+                gap: "1rem",
+                padding: "1rem",
+                flexShrink: 0,
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      color: "#2d3748",
+                      fontSize: "1.25rem",
+                    }}
+                  >
+                    {document.filename.split(".")[0]}
+                  </span>
+                  <button
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                    }}
+                    onClick={() => handleDeleteDocument(document.id)}
+                  >
+                    <DeleteIcon color="error" />
+                  </button>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#4a5568",
+                      fontSize: "0.8rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <ScheduleIcon /> Created: {formatDate(document.createdAt)}
+                  </span>
+                  <span
+                    style={{
+                      color: "#4a5568",
+                      fontSize: "0.8rem",
+                      whiteSpace: "nowrap",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <UpdateIcon /> Updated: {formatDate(document.updatedAt)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Analyses list */}
+      {!loading && !error && document && (
+        <>
+          <div style={{ marginTop: "1rem", paddingBottom: "1.5rem" }}>
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                gap: "1rem",
+                alignItems: "center",
+                marginBottom: "1rem",
               }}
             >
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 700, color: "#2d3748" }}>
-                  {document.filename.split(".")[0]}
-                </div>
-                <button onClick={() => handleDeleteDocument(document.id)}>
-                  Delete Document
-                </button>
-                <div style={{ color: "#4a5568", fontSize: "0.9rem" }}>
-                  Created: {formatDate(document.createdAt)}
-                </div>
-              </div>
-              <div
-                style={{
-                  color: "#4a5568",
-                  fontSize: "0.85rem",
-                  whiteSpace: "nowrap",
-                }}
+              <h2 style={{ margin: 0, color: "white" }}>Analyses</h2>
+              <button
+                onClick={() => navigate("/analyze", { state: { document } })}
               >
-                Updated: {formatDate(document.updatedAt)}
-              </div>
-              <iframe
-                src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
-                width="100%"
-                height="600px"
-              />
+                Generate New Analysis
+              </button>
             </div>
-          </div>
-
-          <div style={{ marginTop: "2rem" }}>
-            <h2 style={{ margin: "0 0 1rem", color: "white" }}>Analyses</h2>
-            <button
-              onClick={() => navigate("/analyze", { state: { document } })}
-            >
-              Generate New Analysis
-            </button>
 
             {analyses.length === 0 && (
               <p style={{ color: "white" }}>No analyses yet.</p>
@@ -344,197 +438,227 @@ export default function DocumentDetail() {
                 style={{
                   background: "white",
                   borderRadius: 5,
-                  padding: "1rem",
                   width: "100%",
                   boxShadow: "0 10px 25px rgba(0, 0, 0, 0.06)",
                   marginBottom: "1.25rem",
+                  display: "flex",
+                  flexDirection: "row",
                 }}
               >
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter" && e.key !== " ") return;
-                    e.preventDefault();
-                    const id = analysis.id ?? String(idx);
-                    setExpandedAnalysisId((prev) => (prev === id ? null : id));
-                  }}
-                  onClick={() => {
-                    const id = analysis.id ?? String(idx);
-                    setExpandedAnalysisId((prev) => (prev === id ? null : id));
-                  }}
+                <span
                   style={{
-                    width: "100%",
-                    textAlign: "left",
-                    background: "transparent",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
+                    fontWeight: 600,
+                    color: "#2d3748",
+                    fontSize: "3rem",
+                    paddingLeft: "1rem",
                   }}
                 >
-                  {(() => {
-                    const id = analysis.id ?? String(idx);
-                    const isOpen = expandedAnalysisId === id;
-                    const summary = analysis?.result?.summary;
-                    const summarySnippet =
-                      typeof summary === "string"
-                        ? summary.trim().slice(0, 180)
-                        : "";
+                  {analyses.length - idx}
+                </span>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                    padding: "1rem",
+                    flex: 1,
+                  }}
+                >
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter" && e.key !== " ") return;
+                      e.preventDefault();
+                      const id = analysis.id ?? String(idx);
+                      setExpandedAnalysisId((prev) =>
+                        prev === id ? null : id,
+                      );
+                    }}
+                    onClick={() => {
+                      const id = analysis.id ?? String(idx);
+                      setExpandedAnalysisId((prev) =>
+                        prev === id ? null : id,
+                      );
+                    }}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      background: "transparent",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {(() => {
+                      const id = analysis.id ?? String(idx);
+                      const isOpen = expandedAnalysisId === id;
+                      const summary = analysis?.result?.summary;
+                      const summarySnippet =
+                        typeof summary === "string"
+                          ? summary.trim().slice(0, 180)
+                          : "";
 
-                    return (
-                      <>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "1rem",
-                          }}
-                        >
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, color: "#2d3748" }}>
-                              Analysis #{analyses.length - idx}
-                            </div>
-                            <div
-                              style={{ color: "#4a5568", fontSize: "0.9rem" }}
-                            >
-                              Created: {formatDate(analysis.createdAt)}
-                            </div>
-                            <div
-                              style={{ color: "#4a5568", fontSize: "0.9rem" }}
-                            >
-                              Prompt Version: {analysis.promptVersion}
-                            </div>
-                          </div>
+                      return (
+                        <>
                           <div
                             style={{
                               display: "flex",
-                              flexDirection: "column",
-                              alignItems: "flex-end",
-                              gap: 8,
+                              justifyContent: "space-between",
+                              gap: "1rem",
                             }}
                           >
-                            {analysis.userPrompt ? (
-                              <div
+                            <div>
+                              <span
                                 style={{
                                   color: "#4a5568",
-                                  fontSize: "0.85rem",
-                                  whiteSpace: "nowrap",
+                                  fontSize: "0.8rem",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.5rem",
                                 }}
                               >
-                                User prompt: yes
-                              </div>
-                            ) : (
-                              <div
-                                style={{
-                                  color: "#4a5568",
-                                  fontSize: "0.85rem",
-                                  whiteSpace: "nowrap",
-                                }}
+                                <ScheduleIcon />{" "}
+                                {formatDate(analysis.createdAt)}
+                              </span>
+                              <span
+                                style={{ color: "#4a5568", fontSize: "0.9rem" }}
                               >
-                                User prompt: no
-                              </div>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (!analysis.id) return;
-                                handleDeleteAnalysis(analysis.id);
-                              }}
-                              disabled={
-                                !analysis.id ||
-                                deletingAnalysisId === analysis.id
-                              }
+                                Prompt Version: {analysis.promptVersion}
+                              </span>
+                            </div>
+                            <div
                               style={{
-                                padding: "0.35rem 0.6rem",
-                                background:
-                                  deletingAnalysisId === analysis.id
-                                    ? "#fed7d7"
-                                    : "#e53e3e",
-                                color: "white",
-                                border: "none",
-                                borderRadius: 5,
-                                cursor:
-                                  !analysis.id ||
-                                  deletingAnalysisId === analysis.id
-                                    ? "not-allowed"
-                                    : "pointer",
-                                fontSize: "0.8rem",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-end",
+                                gap: 8,
                               }}
                             >
-                              {deletingAnalysisId === analysis.id
-                                ? "Deleting..."
-                                : "Delete"}
-                            </button>
-                          </div>
-                        </div>
+                              {analysis.userPrompt ? (
+                                <div
+                                  style={{
+                                    color: "#4a5568",
+                                    fontSize: "0.85rem",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  User prompt: yes
+                                </div>
+                              ) : (
+                                <div
+                                  style={{
+                                    color: "#4a5568",
+                                    fontSize: "0.85rem",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  User prompt: no
+                                </div>
+                              )}
 
-                        {summarySnippet && !isOpen && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!analysis.id) return;
+                                  handleDeleteAnalysis(analysis.id);
+                                }}
+                                disabled={
+                                  !analysis.id ||
+                                  deletingAnalysisId === analysis.id
+                                }
+                                style={{
+                                  padding: "0.35rem 0.6rem",
+                                  background:
+                                    deletingAnalysisId === analysis.id
+                                      ? "#fed7d7"
+                                      : "#e53e3e",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: 5,
+                                  cursor:
+                                    !analysis.id ||
+                                    deletingAnalysisId === analysis.id
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  fontSize: "0.8rem",
+                                }}
+                              >
+                                {deletingAnalysisId === analysis.id
+                                  ? "Deleting..."
+                                  : "Delete"}
+                              </button>
+                            </div>
+                          </div>
+
+                          {summarySnippet && !isOpen && (
+                            <div
+                              style={{
+                                marginTop: 10,
+                                color: "#4a5568",
+                                fontSize: "0.95rem",
+                                lineHeight: 1.4,
+                                maxHeight: 56,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {summarySnippet}
+                              {String(summary).length > 180 ? "..." : ""}
+                            </div>
+                          )}
+
                           <div
                             style={{
                               marginTop: 10,
-                              color: "#4a5568",
-                              fontSize: "0.95rem",
-                              lineHeight: 1.4,
-                              maxHeight: 56,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
+                              color: "#718096",
+                              fontSize: "0.9rem",
                             }}
                           >
-                            {summarySnippet}
-                            {String(summary).length > 180 ? "..." : ""}
+                            {isOpen ? "Hide details" : "Show details"}
                           </div>
-                        )}
+                        </>
+                      );
+                    })()}
+                  </div>
 
-                        <div
-                          style={{
-                            marginTop: 10,
-                            color: "#718096",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          {isOpen ? "Hide details" : "Show details"}
-                        </div>
+                  {(() => {
+                    const id = analysis.id ?? String(idx);
+                    const isOpen = expandedAnalysisId === id;
+                    if (!isOpen) return null;
+
+                    return (
+                      <>
+                        {analysis.userPrompt ? (
+                          <div
+                            style={{
+                              marginTop: "0.75rem",
+                              background: "#f7fafc",
+                              border: "1px solid #e2e8f0",
+                              padding: "0.75rem",
+                              borderRadius: 5,
+                              color: "#2d3748",
+                              whiteSpace: "pre-wrap",
+                              fontSize: "0.9rem",
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {analysis.userPrompt}
+                          </div>
+                        ) : null}
+
+                        <AnalysisResultRenderer result={analysis.result} />
                       </>
                     );
                   })()}
                 </div>
-
-                {(() => {
-                  const id = analysis.id ?? String(idx);
-                  const isOpen = expandedAnalysisId === id;
-                  if (!isOpen) return null;
-
-                  return (
-                    <>
-                      {analysis.userPrompt ? (
-                        <div
-                          style={{
-                            marginTop: "0.75rem",
-                            background: "#f7fafc",
-                            border: "1px solid #e2e8f0",
-                            padding: "0.75rem",
-                            borderRadius: 5,
-                            color: "#2d3748",
-                            whiteSpace: "pre-wrap",
-                            fontSize: "0.9rem",
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          {analysis.userPrompt}
-                        </div>
-                      ) : null}
-
-                      <AnalysisResultRenderer result={analysis.result} />
-                    </>
-                  );
-                })()}
               </div>
             ))}
           </div>
 
+          {/* Delete error */}
           {deleteError && <p style={{ color: "white" }}>{deleteError}</p>}
         </>
       )}
