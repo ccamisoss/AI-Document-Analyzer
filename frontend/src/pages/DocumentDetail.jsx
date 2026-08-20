@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+import { formatDate } from "../utils";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -9,18 +10,6 @@ import UpdateIcon from "@mui/icons-material/Update";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function formatDate(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  return d.toLocaleString("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function AnalysisResultRenderer({ result }) {
   const summary = result?.summary;
@@ -249,7 +238,6 @@ export default function DocumentDetail() {
   return (
     <div
       style={{
-        padding: "0 1rem",
         height: "100%",
         minHeight: 0,
         alignSelf: "stretch",
@@ -264,11 +252,11 @@ export default function DocumentDetail() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "1rem",
+          gap: "2rem",
           minHeight: "100%",
           flexShrink: 0,
           boxSizing: "border-box",
-          paddingBottom: "1rem",
+          paddingBottom: "2rem",
         }}
       >
         {/* Header */}
@@ -277,8 +265,10 @@ export default function DocumentDetail() {
             display: "flex",
             alignItems: "center",
             gap: "1rem",
-            margin: "1.5rem 0 0",
+            padding: "1rem 1rem 0.75rem 1rem",
             flexShrink: 0,
+            backgroundColor: "white",
+            borderBottom: "1px solid black",
           }}
         >
           <button
@@ -289,125 +279,126 @@ export default function DocumentDetail() {
               cursor: "pointer",
             }}
           >
-            <KeyboardBackspaceIcon sx={{ fill: "white" }} />
+            <KeyboardBackspaceIcon />
           </button>
-          <h1 style={{ color: "white" }}>Document Detail</h1>
+          <h1>Document Detail</h1>
         </div>
+        <div style={{ padding: "0 2rem", display: "flex", flexDirection: "column", flex: 1 }}>
+          {/* Loading and error messages */}
+          {loading && <p style={{ color: "white" }}>Loading...</p>}
+          {error && <p style={{ color: "white" }}>{error}</p>}
+          {!loading && !error && !document && (
+            <p style={{ color: "white" }}>Document not found.</p>
+          )}
 
-        {/* Loading and error messages */}
-        {loading && <p style={{ color: "white" }}>Loading...</p>}
-        {error && <p style={{ color: "white" }}>{error}</p>}
-        {!loading && !error && !document && (
-          <p style={{ color: "white" }}>Document not found.</p>
-        )}
-
-        {/* Document Preview */}
-        {!loading && !error && document && (
-          <div
-            style={{
-              background: "white",
-              borderRadius: 5,
-              width: "100%",
-              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
-              display: "flex",
-              flexDirection: "row",
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
-            }}
-          >
-            <iframe
-              src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                height: "100%",
-                border: "none",
-                borderTopLeftRadius: "5px",
-                borderBottomLeftRadius: "5px",
-              }}
-              title="PDF Preview"
-            />
+          {/* Document Preview */}
+          {!loading && !error && document && (
             <div
               style={{
+                background: "white",
+                borderRadius: 5,
+                width: "100%",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
                 display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                width: "50%",
-                gap: "1rem",
-                padding: "1rem",
-                flexShrink: 0,
+                flexDirection: "row",
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
               }}
             >
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <span
+              <iframe
+                src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  height: "100%",
+                  border: "none",
+                  borderTopLeftRadius: "5px",
+                  borderBottomLeftRadius: "5px",
+                }}
+                title="PDF Preview"
+              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  width: "50%",
+                  gap: "1rem",
+                  padding: "1rem",
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div
                     style={{
-                      fontWeight: 700,
-                      color: "#2d3748",
-                      fontSize: "1.25rem",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "0.5rem",
                     }}
                   >
-                    {document.filename.split(".")[0]}
-                  </span>
-                  <button
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        color: "#2d3748",
+                        fontSize: "1.25rem",
+                      }}
+                    >
+                      {document.filename.split(".")[0]}
+                    </span>
+                    <button
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                      }}
+                      onClick={() => handleDeleteDocument(document.id)}
+                    >
+                      <DeleteIcon color="error" />
+                    </button>
+                  </div>
+                  <div
                     style={{
-                      border: "none",
-                      background: "transparent",
-                    }}
-                    onClick={() => handleDeleteDocument(document.id)}
-                  >
-                    <DeleteIcon color="error" />
-                  </button>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#4a5568",
-                      fontSize: "0.8rem",
                       display: "flex",
                       alignItems: "center",
                       gap: "0.5rem",
                     }}
                   >
-                    <ScheduleIcon /> Created: {formatDate(document.createdAt)}
-                  </span>
-                  <span
-                    style={{
-                      color: "#4a5568",
-                      fontSize: "0.8rem",
-                      whiteSpace: "nowrap",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <UpdateIcon /> Updated: {formatDate(document.updatedAt)}
-                  </span>
+                    <span
+                      style={{
+                        color: "#4a5568",
+                        fontSize: "0.8rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <ScheduleIcon /> Created: {formatDate(document.createdAt)}
+                    </span>
+                    <span
+                      style={{
+                        color: "#4a5568",
+                        fontSize: "0.8rem",
+                        whiteSpace: "nowrap",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <UpdateIcon /> Updated: {formatDate(document.updatedAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Analyses list */}
       {!loading && !error && document && (
         <>
-          <div style={{ marginTop: "1rem", paddingBottom: "1.5rem" }}>
+          <div style={{ padding: "2rem" }}>
             <div
               style={{
                 display: "flex",

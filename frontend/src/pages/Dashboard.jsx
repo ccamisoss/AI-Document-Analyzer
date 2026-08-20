@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+import { formatDate } from "../utils";
+
+import UpdateIcon from "@mui/icons-material/Update";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function formatDate(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
-}
 
 export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
@@ -66,16 +64,15 @@ export default function Dashboard() {
   return (
     <div
       style={{
-        padding: "0 1rem",
         height: "100%",
         overflow: "auto",
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
+        gap: "2rem",
       }}
     >
-      <h1 style={{ margin: "1.5rem 0 1rem", color: "white" }}>Dashboard</h1>
+      <h1 style={{ padding: "1.25rem 0 0.75rem", backgroundColor: "white", paddingLeft: "1rem", borderBottom: "1px solid black" }}>Dashboard</h1>
 
       {loading && <p style={{ color: "white" }}>Loading documents...</p>}
       {error && <p style={{ color: "white" }}>{error}</p>}
@@ -85,7 +82,7 @@ export default function Dashboard() {
       )}
 
       {!loading && !error && documents.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", padding: "0 2rem" }}>
           {documents.map((doc) => (
             <button
               key={doc.id}
@@ -96,58 +93,95 @@ export default function Dashboard() {
                 background: "white",
                 border: "none",
                 borderRadius: 5,
-                padding: "1rem",
+                padding: 0,
                 cursor: "pointer",
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
                 marginBottom: "1rem",
+                display: "flex",
               }}
             >
+              <span
+                style={{
+                  fontSize: "2.5rem",
+                  fontWeight: 600,
+                  paddingLeft: "1rem",
+                  paddingTop: "1rem",
+                  width: "90px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {doc.id}
+              </span>
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  gap: "1rem",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                  padding: "1rem",
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <div
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "1rem",
+                    flexDirection: "column",
+                  }}
+                >
+                  <span
                     style={{
                       fontWeight: 700,
-                      marginBottom: 6,
+                      marginBottom: "0.5rem",
                       color: "#2d3748",
+                      fontSize: "1.25rem",
                     }}
                   >
-                    Document {doc.id}
-                  </div>
-                  <div style={{ color: "#4a5568", fontSize: "0.9rem" }}>
-                    Created: {formatDate(doc.createdAt)}
+                    {doc.filename.split(".")[0]}
+                  </span>
+                  <div style={{display: "flex", gap: "1rem"}}>
+                    <span
+                      style={{
+                        color: "#4a5568",
+                        fontSize: "0.9rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <ScheduleIcon /> Created: {formatDate(doc.createdAt)}
+                    </span>
+
+                    {doc.updatedAt ? (
+                      <span
+                        style={{
+                          color: "#4a5568",
+                          fontSize: "0.9rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <UpdateIcon /> Updated: {formatDate(doc.updatedAt)}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <div
                   style={{
+                    marginTop: 10,
                     color: "#4a5568",
-                    fontSize: "0.85rem",
-                    whiteSpace: "nowrap",
+                    fontSize: "0.95rem",
+                    lineHeight: 1.4,
+                    maxHeight: 56,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
-                  {doc.updatedAt
-                    ? `Updated: ${formatDate(doc.updatedAt)}`
-                    : null}
+                  {(doc.content || "").slice(0, 220)}
+                  {(doc.content || "").length > 220 ? "..." : ""}
                 </div>
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
-                  color: "#4a5568",
-                  fontSize: "0.95rem",
-                  lineHeight: 1.4,
-                  maxHeight: 56,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {(doc.content || "").slice(0, 220)}
-                {(doc.content || "").length > 220 ? "..." : ""}
               </div>
             </button>
           ))}
