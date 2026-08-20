@@ -38,10 +38,6 @@ function AnalysisResultRenderer({ result }) {
       className="response-panel success-panel"
       style={{ width: "100%", marginTop: "1rem" }}
     >
-      <h2 className="response-title" style={{ fontSize: "1.25rem" }}>
-        Analysis Result
-      </h2>
-
       {summary && summary.trim() && (
         <section className="response-section">
           <h3 className="section-title">Summary</h3>
@@ -521,76 +517,40 @@ export default function DocumentDetail() {
                                 <ScheduleIcon />{" "}
                                 {formatDate(analysis.createdAt)}
                               </span>
-                              <span
+                              {/* <span
                                 style={{ color: "#4a5568", fontSize: "0.9rem" }}
                               >
                                 Prompt Version: {analysis.promptVersion}
-                              </span>
+                              </span> */}
                             </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "flex-end",
-                                gap: 8,
-                              }}
-                            >
-                              {analysis.userPrompt ? (
-                                <div
-                                  style={{
-                                    color: "#4a5568",
-                                    fontSize: "0.85rem",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  User prompt: yes
-                                </div>
-                              ) : (
-                                <div
-                                  style={{
-                                    color: "#4a5568",
-                                    fontSize: "0.85rem",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  User prompt: no
-                                </div>
-                              )}
 
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  if (!analysis.id) return;
-                                  handleDeleteAnalysis(analysis.id);
-                                }}
-                                disabled={
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!analysis.id) return;
+                                handleDeleteAnalysis(analysis.id);
+                              }}
+                              disabled={
+                                !analysis.id ||
+                                deletingAnalysisId === analysis.id
+                              }
+                              style={{
+                                padding: "0.35rem 0.6rem",
+                                border: "none",
+                                borderRadius: 5,
+                                background: "transparent",
+                                cursor:
                                   !analysis.id ||
                                   deletingAnalysisId === analysis.id
-                                }
-                                style={{
-                                  padding: "0.35rem 0.6rem",
-                                  background:
-                                    deletingAnalysisId === analysis.id
-                                      ? "#fed7d7"
-                                      : "#e53e3e",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: 5,
-                                  cursor:
-                                    !analysis.id ||
-                                    deletingAnalysisId === analysis.id
-                                      ? "not-allowed"
-                                      : "pointer",
-                                  fontSize: "0.8rem",
-                                }}
-                              >
-                                {deletingAnalysisId === analysis.id
-                                  ? "Deleting..."
-                                  : "Delete"}
-                              </button>
-                            </div>
+                                    ? "wait"
+                                    : "pointer",
+                                fontSize: "0.8rem",
+                              }}
+                            >
+                              <DeleteIcon color="error" />
+                            </button>
                           </div>
 
                           {summarySnippet && !isOpen && (
@@ -632,23 +592,39 @@ export default function DocumentDetail() {
                     return (
                       <>
                         {analysis.userPrompt ? (
-                          <div
-                            style={{
-                              marginTop: "0.75rem",
-                              background: "#f7fafc",
-                              border: "1px solid #e2e8f0",
-                              padding: "0.75rem",
-                              borderRadius: 5,
-                              color: "#2d3748",
-                              whiteSpace: "pre-wrap",
-                              fontSize: "0.9rem",
-                              lineHeight: 1.4,
-                            }}
-                          >
-                            {analysis.userPrompt}
-                          </div>
+                          <>
+                            <span
+                              style={{
+                                fontSize: "0.9rem",
+                                fontWeight: 600,
+                                marginTop: "0.75rem",
+                              }}
+                            >
+                              User prompt:
+                            </span>
+                            <div
+                              style={{
+                                background: "#f7fafc",
+                                border: "1px solid #e2e8f0",
+                                padding: "0.75rem",
+                                borderRadius: 5,
+                                color: "#2d3748",
+                                whiteSpace: "pre-wrap",
+                                fontSize: "0.9rem",
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {analysis.userPrompt}
+                            </div>
+                          </>
                         ) : null}
 
+                        <h2
+                          className="response-title"
+                          style={{ fontSize: "1.25rem" }}
+                        >
+                          Analysis Result
+                        </h2>
                         <AnalysisResultRenderer result={analysis.result} />
                       </>
                     );

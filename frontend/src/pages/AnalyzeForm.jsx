@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import authService from "../services/auth.service";
 import { useSession } from "../hooks/useSession";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +14,25 @@ function AnalyzeForm() {
   const state = useLocation().state;
   const [document, setDocument] = useState(state?.document || null);
   const navigate = useNavigate();
+
+  // Memoize so createObjectURL isn't called on every prompt keystroke.
+  const previewSrc = useMemo(() => {
+    if (document?.path) {
+      return `${API_BASE_URL}/${document.path.replace("\\", "/")}`;
+    }
+    if (file) {
+      return URL.createObjectURL(file);
+    }
+    return undefined;
+  }, [document, file]);
+
+  useEffect(() => {
+    return () => {
+      if (previewSrc?.startsWith("blob:")) {
+        URL.revokeObjectURL(previewSrc);
+      }
+    };
+  }, [previewSrc]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -118,13 +137,7 @@ function AnalyzeForm() {
       <form onSubmit={handleSubmit} className="upload-form">
         <div style={{ flex: 1, display: "flex" }}>
           <iframe
-            src={
-              document
-                ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
-                : file
-                  ? URL.createObjectURL(file)
-                  : undefined
-            }
+            src={previewSrc}
             width="100%"
             style={{
               flex: 1,
