@@ -309,9 +309,7 @@ export default function DocumentDetail() {
               <iframe
                 src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
                 style={{
-                  flex: 1,
-                  minWidth: 0,
-                  height: "100%",
+                  width: "50%",
                   border: "none",
                   borderTopLeftRadius: "5px",
                   borderBottomLeftRadius: "5px",
@@ -326,7 +324,6 @@ export default function DocumentDetail() {
                   width: "50%",
                   gap: "1rem",
                   padding: "1rem",
-                  flexShrink: 0,
                 }}
               >
                 <div style={{ minWidth: 0 }}>
