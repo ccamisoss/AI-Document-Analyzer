@@ -4,15 +4,18 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 const buttonStyle = {
   padding: "0.5rem 1rem",
-  background: "#f1f5f9",
-  color: "#1a202c",
-  border: "none",
-  borderRadius: 5,
+  background: "transparent",
+  color: "black",
+  border: "1px solid black",
   cursor: "pointer",
   fontSize: "0.875rem",
   display: "flex",
   alignItems: "center",
   gap: "0.5rem",
+  fontWeight: 600,
+  borderTop: "none",
+  borderLeft: "none",
+  borderRight: "none",
 };
 
 function DashboardLayout() {
@@ -27,10 +30,11 @@ function DashboardLayout() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
+          borderRight: "1px solid black",
         }}
       >
         <div
-          style={{ display: "flex", gap: "0.75rem", flexDirection: "column" }}
+          style={{ display: "flex", flexDirection: "column" }}
         >
           <Link to={"/"} style={buttonStyle}>
             Dashboard
@@ -53,7 +57,7 @@ function DashboardLayout() {
             {user?.email}
           </span>
 
-          <button onClick={logout} style={buttonStyle}>
+          <button onClick={logout} style={{...buttonStyle, borderTop: "1px solid black", borderRadius: 0}}>
             <LogoutIcon />
             Logout
           </button>

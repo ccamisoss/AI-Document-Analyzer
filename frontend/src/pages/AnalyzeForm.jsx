@@ -122,81 +122,89 @@ function AnalyzeForm() {
   return (
     <div
       style={{
-        padding: "0 1rem",
         height: "100%",
         overflow: "auto",
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
+        gap: "2rem",
       }}
     >
-      <h1 style={{ margin: "1.5rem 0 1rem", color: "white" }}>
+      <h1
+        style={{
+          padding: "1.25rem 0 0.75rem",
+          backgroundColor: "white",
+          paddingLeft: "1rem",
+          borderBottom: "1px solid black",
+        }}
+      >
         Document Analyzer
       </h1>
-      <form onSubmit={handleSubmit} className="upload-form">
-        <div style={{ flex: 1, display: "flex" }}>
-          <iframe
-            src={previewSrc}
-            width="100%"
+      <div style={{ padding: "0 2rem", display: "flex", flexDirection: "column", flex: 1 }}>
+        <form onSubmit={handleSubmit} className="upload-form">
+          <div style={{ flex: 1, display: "flex" }}>
+            <iframe
+              src={previewSrc}
+              width="100%"
+              style={{
+                flex: 1,
+                borderTopLeftRadius: "5px",
+                borderBottomLeftRadius: "5px",
+              }}
+              title="PDF Preview"
+            />
+          </div>
+          <div
             style={{
-              flex: 1,
-              borderTopLeftRadius: "5px",
-              borderBottomLeftRadius: "5px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.5rem",
+              width: "50%",
+              padding: "1rem",
             }}
-            title="PDF Preview"
-          />
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.5rem",
-            width: "50%",
-            padding: "1rem",
-          }}
-        >
-          <div className="file-input-container">
-            <label for="pdf-file" htmlFor="pdf-file" className="file-label">
-              Document Upload
-            </label>
-            <input
-              id="pdf-file"
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              disabled={loading}
-              className="file-input"
-              placeholder="Select a PDF file"
-            />
-          </div>
-
-          <div className="prompt-input-container">
-            <label htmlFor="prompt" className="prompt-label">
-              Prompt
-            </label>
-            <textarea
-              id="prompt"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              disabled={loading}
-              className="prompt-textarea"
-              placeholder="Enter an optional prompt to guide the analysis or ask questions about the document..."
-              rows={4}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || (!file && !document)}
-            className="submit-button"
           >
-            {loading ? "Analyzing..." : "Analyze"}
-          </button>
-        </div>
-      </form>
+            <div className="file-input-container">
+              <label for="pdf-file" htmlFor="pdf-file" className="file-label">
+                Document Upload
+              </label>
+              <input
+                id="pdf-file"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                disabled={loading}
+                className="file-input"
+                placeholder="Select a PDF file"
+              />
+            </div>
 
-      {error && <div className="error-message">{error}</div>}
+            <div className="prompt-input-container">
+              <label htmlFor="prompt" className="prompt-label">
+                Prompt
+              </label>
+              <textarea
+                id="prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                disabled={loading}
+                className="prompt-textarea"
+                placeholder="Enter an optional prompt to guide the analysis or ask questions about the document..."
+                rows={4}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || (!file && !document)}
+              className="submit-button"
+            >
+              {loading ? "Analyzing..." : "Analyze"}
+            </button>
+          </div>
+        </form>
+
+        {error && <div className="error-message">{error}</div>}
+      </div>
     </div>
   );
 }
