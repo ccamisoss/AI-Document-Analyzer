@@ -268,7 +268,7 @@ export default function DocumentDetail() {
             cursor: "pointer",
           }}
         >
-          <KeyboardBackspaceIcon />
+          <KeyboardBackspaceIcon sx={{ fill: "white" }}/>
         </button>
         <h1 style={{ color: "white" }}>Document Detail</h1>
       </div>

@@ -112,25 +112,28 @@ function AnalyzeForm() {
         gap: "1rem",
       }}
     >
-      {loading && <div>Analizing document...</div>}
       <h1 style={{ margin: "1.5rem 0 1rem", color: "white" }}>
         Document Analyzer
       </h1>
       <form onSubmit={handleSubmit} className="upload-form">
-        {(file || document) && (
-          <div style={{ flex: 1 }}>
-            <iframe
-              src={
-                document
-                  ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
-                  : URL.createObjectURL(file)
-              }
-              width="100%"
-              height="100%"
-              title="PDF Preview"
-            />
-          </div>
-        )}
+        <div style={{ flex: 1, display: "flex" }}>
+          <iframe
+            src={
+              document
+                ? `${API_BASE_URL}/${document?.path.replace("\\", "/")}`
+                : file
+                  ? URL.createObjectURL(file)
+                  : undefined
+            }
+            width="100%"
+            style={{
+              flex: 1,
+              borderTopLeftRadius: "5px",
+              borderBottomLeftRadius: "5px",
+            }}
+            title="PDF Preview"
+          />
+        </div>
         <div
           style={{
             display: "flex",
