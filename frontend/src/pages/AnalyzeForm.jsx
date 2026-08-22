@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const TEST_REDIRECT_DELAY_MS = 3_000;
 
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+
 function AnalyzeForm() {
   const { logout } = useSession();
   const [file, setFile] = useState(null);
@@ -127,7 +129,7 @@ function AnalyzeForm() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "2rem",
+        gap: "1.5rem",
       }}
     >
       <h1
@@ -140,31 +142,79 @@ function AnalyzeForm() {
       >
         Document Analyzer
       </h1>
-      <div style={{ padding: "0 2rem", display: "flex", flexDirection: "column", flex: 1 }}>
+      <div
+        style={{
+          padding: "0 1.5rem",
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+        }}
+      >
         <form onSubmit={handleSubmit} className="upload-form">
-          <div style={{ flex: 1, display: "flex" }}>
-            <iframe
-              src={previewSrc}
-              width="100%"
-              style={{
-                flex: 1,
-                borderTopLeftRadius: "5px",
-                borderBottomLeftRadius: "5px",
-              }}
-              title="PDF Preview"
-            />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              padding: "1rem",
+              boxSizing: "border-box",
+            }}
+          >
+            {previewSrc ? (
+              <iframe
+                src={previewSrc}
+                width="100%"
+                style={{
+                  flex: 1,
+                  borderRadius: 5,
+                }}
+                title="PDF Preview"
+              />
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 5,
+                  border: "2px solid #e2e8f0",
+                  gap: "0.7rem",
+                }}
+              >
+                <DescriptionOutlinedIcon
+                  style={{
+                    fontSize: "5rem",
+                    fill: "#667eea",
+                    padding: "1rem",
+                  }}
+                />
+                <span style={{ fontSize: "1.5rem" }}>No document selected</span>
+                <p
+                  style={{
+                    fontSize: "0.8rem",
+                    width: "60%",
+                    textAlign: "center",
+                    margin: 0,
+                  }}
+                >
+                  Select a PDF to preview your document before analyzing it.
+                </p>
+              </div>
+            )}
           </div>
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "1.5rem",
-              width: "50%",
+              width: "45%",
               padding: "1rem",
+              paddingLeft: "0",
             }}
           >
             <div className="file-input-container">
-              <label for="pdf-file" htmlFor="pdf-file" className="file-label">
+              <label htmlFor="pdf-file" className="file-label">
                 Document Upload
               </label>
               <input
