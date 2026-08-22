@@ -31,6 +31,7 @@ function DashboardLayout() {
           flexDirection: "column",
           justifyContent: "space-between",
           borderRight: "1px solid black",
+          width: "210px",
         }}
       >
         <div
@@ -50,8 +51,9 @@ function DashboardLayout() {
           <span
             style={{
               color: "#4a5568",
-              fontSize: "0.875rem",
-              paddingInline: "8px",
+              fontSize: "13px",
+              margin: "0 5px",
+              wordWrap: "anywhere"
             }}
           >
             {user?.email}
