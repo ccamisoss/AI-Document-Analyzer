@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
 import { formatDate } from "../utils";
 
-import UpdateIcon from "@mui/icons-material/Update";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -69,7 +70,7 @@ export default function Dashboard() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: "2rem",
+        gap: "1.5rem",
       }}
     >
       <h1
@@ -93,110 +94,94 @@ export default function Dashboard() {
       {!loading && !error && documents.length > 0 && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            display: "flex",
+            flexDirection: "column",
             gap: "1rem",
-            padding: "0 2rem",
+            padding: "0 1.5rem",
           }}
         >
           {documents.map((doc) => (
-            <button
+            <div
               key={doc.id}
-              onClick={() => handleClickDocument(doc.id)}
               style={{
                 textAlign: "left",
                 width: "100%",
                 background: "white",
-                border: "none",
                 borderRadius: 5,
-                cursor: "pointer",
                 boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
                 display: "flex",
-                flexDirection: "column",
                 gap: "0.5rem",
-                padding: "1rem",
-                height: "200px",
+                padding: "1.5rem",
+                boxSizing: "border-box",
                 justifyContent: "space-between",
               }}
             >
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  alignItems: "center",
                   gap: "1rem",
-                  flexDirection: "column",
                 }}
               >
+                <DescriptionOutlinedIcon
+                  style={{ fill: "#667eea", fontSize: "2.5rem", padding: "0 0.5rem" }}
+                />
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
+                    flexDirection: "column",
+                    gap: "0.5rem",
                   }}
                 >
                   <span
                     style={{
-                      fontSize: "2rem",
                       fontWeight: 600,
-                      width: "fit-content",
-                    }}
-                  >
-                    {doc.id}
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 700,
                       marginBottom: "0.5rem",
                       color: "#2d3748",
-                      fontSize: "1.25rem",
+                      fontSize: "1.1rem",
                     }}
                   >
-                    {doc.filename.split(".")[0]}
+                    {doc.filename}
                   </span>
+                  {doc.analyses.length > 0 && (
+                    <span style={{ fontSize: "0.75rem" }}>
+                      Last analyzed:{" "}
+                      {formatDate(
+                        doc.analyses[doc.analyses.length - 1].createdAt,
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
               <div
-                style={{
-                  color: "#4a5568",
-                  fontSize: "0.85rem",
-                  // lineHeight: 1.4,
-                  maxHeight: "30%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                }}
+                style={{ display: "flex", gap: "1rem", alignItems: "center" }}
               >
-                {(doc.content || "").slice(0, 130)}
-                {(doc.content || "").length > 130 ? "..." : ""}
-              </div>
-              <div style={{ display: "flex", gap: "1rem" }}>
                 <span
                   style={{
-                    color: "#4a5568",
-                    fontSize: "0.8rem",
+                    color: "#667eea",
+                    fontSize: "1rem",
                     display: "flex",
                     alignItems: "center",
                     gap: "0.5rem",
                   }}
                 >
-                  <ScheduleIcon /> {formatDate(doc.createdAt)}
+                  {doc.analyses.length} analyses
                 </span>
-
-                {doc.updatedAt ? (
-                  <span
-                    style={{
-                      color: "#4a5568",
-                      fontSize: "0.8rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <UpdateIcon /> {formatDate(doc.updatedAt)}
-                  </span>
-                ) : null}
+                <button
+                  onClick={() => handleClickDocument(doc.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "0 0.5rem",
+                  }}
+                >
+                  <KeyboardArrowRightOutlinedIcon
+                    style={{ fontSize: "1.5rem" }}
+                  />
+                </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
