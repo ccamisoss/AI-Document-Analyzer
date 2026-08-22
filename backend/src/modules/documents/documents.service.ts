@@ -107,11 +107,15 @@ const getDocuments = async ({ userId }: GetDocumentsInput) => {
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
-      content: true,
       createdAt: true,
       updatedAt: true,
       filename: true,
       path: true,
+      analyses: {
+        select: {
+          createdAt: true,
+        },
+      },
     },
   });
 };
