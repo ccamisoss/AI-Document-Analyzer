@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
@@ -6,8 +6,10 @@ import { formatDate } from "../utils";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import DeleteIcon from "@mui/icons-material/Delete";
-import UpdateIcon from "@mui/icons-material/Update";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
+import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -81,6 +83,63 @@ function AnalysisResultRenderer({ result }) {
   );
 }
 
+function sortAnalysesNewestFirst(items) {
+  return [...items].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
+
+function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
+  const scrollRef = useRef(null);
+
+  const sortedAnalyses = useMemo(
+    () => sortAnalysesNewestFirst(analyses),
+    [analyses],
+  );
+
+  const scrollTabs = (direction) => {
+    scrollRef.current?.scrollBy({ left: direction * 140, behavior: "smooth" });
+  };
+
+  return (
+    <div className="analysis-tabs-bar">
+      <button
+        type="button"
+        className="analysis-tabs-arrow"
+        onClick={() => scrollTabs(-1)}
+        aria-label="Scroll tabs left"
+      >
+        <ChevronLeftOutlinedIcon fontSize="small" />
+      </button>
+      <div className="analysis-tabs-scroll" ref={scrollRef}>
+        {sortedAnalyses.map((analysis, idx) => {
+          const isActive = selectedAnalysisId === analysis.id;
+          const label = `Análisis ${sortedAnalyses.length - idx}`;
+
+          return (
+            <button
+              key={analysis.id}
+              type="button"
+              className={`analysis-tab${isActive ? " analysis-tab--active" : ""}`}
+              onClick={() => onSelect(analysis.id)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="analysis-tabs-arrow"
+        onClick={() => scrollTabs(1)}
+        aria-label="Scroll tabs right"
+      >
+        <ChevronRightOutlinedIcon fontSize="small" />
+      </button>
+    </div>
+  );
+}
+
 export default function DocumentDetail() {
   const [document, setDocument] = useState(null);
   const [analyses, setAnalyses] = useState([]);
@@ -94,6 +153,7 @@ export default function DocumentDetail() {
   const params = new URLSearchParams(window.location.search);
   const documentId = params.get("id");
   const token = useMemo(() => authService.getToken(), []);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -143,7 +203,13 @@ export default function DocumentDetail() {
           );
         }
 
-        setAnalyses(Array.isArray(analysesJson.data) ? analysesJson.data : []);
+        const loadedAnalyses = Array.isArray(analysesJson.data)
+          ? analysesJson.data
+          : [];
+        setAnalyses(loadedAnalyses);
+        if (loadedAnalyses.length > 0) {
+          setSelectedAnalysisId(sortAnalysesNewestFirst(loadedAnalyses)[0].id);
+        }
       } catch (e) {
         console.log("Error loading document details:", e);
         setError(e.message || "Failed to load document");
@@ -192,7 +258,14 @@ export default function DocumentDetail() {
         );
       }
 
-      setAnalyses((prev) => prev.filter((a) => a.id !== analysisId));
+      setAnalyses((prev) => {
+        const next = prev.filter((a) => a.id !== analysisId);
+        setSelectedAnalysisId((current) => {
+          if (current !== analysisId) return current;
+          return sortAnalysesNewestFirst(next)[0]?.id ?? null;
+        });
+        return next;
+      });
       setExpandedAnalysisId((prev) => (prev === analysisId ? null : prev));
     } catch (e) {
       setDeleteError(e.message || "Failed to delete analysis");
@@ -252,11 +325,11 @@ export default function DocumentDetail() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "2rem",
+          gap: "1.5rem",
           minHeight: "100%",
           flexShrink: 0,
           boxSizing: "border-box",
-          paddingBottom: "2rem",
+          paddingBottom: "1.5rem",
         }}
       >
         {/* Header */}
@@ -283,7 +356,14 @@ export default function DocumentDetail() {
           </button>
           <h1>Document Detail</h1>
         </div>
-        <div style={{ padding: "0 2rem", display: "flex", flexDirection: "column", flex: 1 }}>
+        <div
+          style={{
+            padding: "0 1.5rem",
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+          }}
+        >
           {/* Loading and error messages */}
           {loading && <p style={{ color: "white" }}>Loading...</p>}
           {error && <p style={{ color: "white" }}>{error}</p>}
@@ -306,86 +386,132 @@ export default function DocumentDetail() {
                 overflow: "hidden",
               }}
             >
-              <iframe
-                src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+              <div
                 style={{
-                  width: "50%",
-                  border: "none",
-                  borderTopLeftRadius: "5px",
-                  borderBottomLeftRadius: "5px",
+                  width: "55%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRight: "1px solid #e2e8f0",
                 }}
-                title="PDF Preview"
-              />
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "1rem",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      color: "#2d3748",
+                      fontSize: "1.25rem",
+                    }}
+                  >
+                    {document.filename}
+                  </span>
+                  <button
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      padding: 0,
+                    }}
+                    onClick={() => handleDeleteDocument(document.id)}
+                  >
+                    <DeleteIcon />
+                  </button>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.9rem",
+                    padding: "0 1rem 1rem 1rem",
+                    boxSizing: "border-box",
+                    fontFamily: "monospace",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#4a5568",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <ScheduleIcon style={{ fontSize: "1.2rem" }} />{" "}
+                    {formatDate(document.createdAt)}
+                  </span>
+                </div>
+                <iframe
+                  src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    borderBottomLeftRadius: "5px",
+                  }}
+                  title="PDF Preview"
+                />
+              </div>
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "space-between",
-                  width: "50%",
-                  gap: "1rem",
-                  padding: "1rem",
+                  width: "45%",
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        color: "#2d3748",
-                        fontSize: "1.25rem",
-                      }}
-                    >
-                      {document.filename.split(".")[0]}
-                    </span>
-                    <button
-                      style={{
-                        border: "none",
-                        background: "transparent",
-                      }}
-                      onClick={() => handleDeleteDocument(document.id)}
-                    >
-                      <DeleteIcon color="error" />
-                    </button>
-                  </div>
-                  <div
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "1rem",
+                    borderBottom: "1px solid #e2e8f0",
+                  }}
+                >
+                  <span style={{ fontSize: "1.2rem", fontWeight: 600 }}>
+                    Analyses
+                  </span>
+                  <button
+                    onClick={() =>
+                      navigate("/analyze", { state: { document } })
+                    }
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "0.5rem",
+                      padding: "0.5rem",
                     }}
                   >
-                    <span
-                      style={{
-                        color: "#4a5568",
-                        fontSize: "0.8rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <ScheduleIcon /> Created: {formatDate(document.createdAt)}
-                    </span>
-                    <span
-                      style={{
-                        color: "#4a5568",
-                        fontSize: "0.8rem",
-                        whiteSpace: "nowrap",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <UpdateIcon /> Updated: {formatDate(document.updatedAt)}
-                    </span>
-                  </div>
+                    <AddOutlinedIcon /> New Analysis
+                  </button>
                 </div>
+                {analyses.length === 0 ? (
+                  <p style={{ padding: "1rem", margin: 0 }}>No analyses yet.</p>
+                ) : (
+                  <>
+                    <AnalysisTabs
+                      analyses={analyses}
+                      selectedAnalysisId={selectedAnalysisId}
+                      onSelect={setSelectedAnalysisId}
+                    />
+                    <div style={{ padding: "1rem", overflow: "auto", flex: 1 }}>
+                      {selectedAnalysisId && (
+                        <AnalysisResultRenderer
+                          result={
+                            analyses.find(
+                              (analysis) => analysis.id === selectedAnalysisId,
+                            )?.result
+                          }
+                        />
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -393,24 +519,10 @@ export default function DocumentDetail() {
       </div>
 
       {/* Analyses list */}
-      {!loading && !error && document && (
+      {/* {!loading && !error && document && (
         <>
           <div style={{ padding: "2rem" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1rem",
-              }}
-            >
-              <h2 style={{ margin: 0, color: "white" }}>Analyses</h2>
-              <button
-                onClick={() => navigate("/analyze", { state: { document } })}
-              >
-                Generate New Analysis
-              </button>
-            </div>
+            
 
             {analyses.length === 0 && (
               <p style={{ color: "white" }}>No analyses yet.</p>
@@ -505,11 +617,7 @@ export default function DocumentDetail() {
                                 <ScheduleIcon />{" "}
                                 {formatDate(analysis.createdAt)}
                               </span>
-                              {/* <span
-                                style={{ color: "#4a5568", fontSize: "0.9rem" }}
-                              >
-                                Prompt Version: {analysis.promptVersion}
-                              </span> */}
+                              
                             </div>
 
                             <button
@@ -622,10 +730,9 @@ export default function DocumentDetail() {
             ))}
           </div>
 
-          {/* Delete error */}
           {deleteError && <p style={{ color: "white" }}>{deleteError}</p>}
         </>
-      )}
+      )} */}
     </div>
   );
 }
