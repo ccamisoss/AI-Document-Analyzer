@@ -10,182 +10,10 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+
+import AnalysisResultRenderer from "../components/AnalysisResultRenderer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function AnalysisResultRenderer({ analysis }) {
-  const summary = analysis?.result?.summary;
-  const keyPoints = analysis?.result?.keyPoints;
-  const insights = analysis?.result?.insights;
-  const notes = analysis?.result?.notes;
-  const answers = analysis?.result?.answers;
-  const userPrompt = analysis?.userPrompt;
-  const createdAt = analysis?.createdAt;
-  const [showUserPrompt, setShowUserPrompt] = useState(false);
-
-  const handleShowUserPrompt = () => {
-    setShowUserPrompt(!showUserPrompt);
-  };
-
-  return (
-    <div style={{ overflowY: "auto", overflowX: "hidden", flex: 1 }}>
-      {/* Date and delete button */}
-      <div
-        style={{
-          padding: "1rem",
-          borderBlock: "1px solid #2d2d2d",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "#4a5568",
-            fontFamily: "monospace",
-            fontSize: "0.8rem",
-            margin: 0,
-          }}
-        >
-          {" "}
-          <ScheduleIcon /> {formatDate(createdAt)}
-        </span>
-        <button
-          style={{
-            border: "none",
-            background: "transparent",
-            padding: 0,
-            cursor: "pointer",
-          }}
-          onClick={() => handleDeleteAnalysis(analysis.id)}
-        >
-          <DeleteIcon />
-        </button>
-      </div>
-
-      {/* Sent Prompt */}
-      {userPrompt && (
-        <div
-          style={{
-            padding: "1rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              border: "1px solid #757575 ",
-              borderRadius: "5px",
-              padding: "0.5rem",
-              boxSizing: "border-box",
-            }}
-          >
-            <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
-              Sent Prompt
-            </span>
-            <button
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                cursor: "pointer",
-              }}
-              onClick={handleShowUserPrompt}
-            >
-              {showUserPrompt ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </button>
-          </div>
-          {!showUserPrompt && (
-            <div
-              style={{
-                padding: "0.5rem",
-                boxSizing: "border-box",
-                border: "1px solid #757575",
-                borderRadius: "5px",
-                backgroundColor: "#1a1a1a",
-              }}
-            >
-              <p style={{ color: "#ffffff" }}>{userPrompt}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Result */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.5rem",
-          padding: "1rem",
-          boxSizing: "border-box",
-        }}
-      >
-        <h3 style={{ margin: 0 }}>Result</h3>
-        <div style={{ width: "100%" }}>
-          {summary && summary.trim() && (
-            <section className="response-section">
-              <div className="summary-text">
-                {summary.split("\n").map((line, idx) => (
-                  <p key={idx}>{line || "\u00A0"}</p>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {Array.isArray(keyPoints) && keyPoints.length > 0 && (
-            <section className="response-section">
-              <span className="section-title">Key Points</span>
-              <ul className="bullet-list">
-                {keyPoints.map((point, idx) => (
-                  <li key={idx}>{point}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {Array.isArray(insights) && insights.length > 0 && (
-            <section className="response-section">
-              <h3 className="section-title">Insights</h3>
-              <ul className="bullet-list">
-                {insights.map((insight, idx) => (
-                  <li key={idx}>{insight}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {notes && String(notes).trim() && (
-            <section className="response-section">
-              <h3 className="section-title">Notes</h3>
-              <p className="notes-text">{notes}</p>
-            </section>
-          )}
-
-          {Array.isArray(answers) && answers.length > 0 && (
-            <section className="response-section">
-              <h3 className="section-title">Answers</h3>
-              <ol className="numbered-list">
-                {answers.map((answer, idx) => (
-                  <li key={idx}>{answer}</li>
-                ))}
-              </ol>
-            </section>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function sortAnalysesOldestFirst(items) {
   return [...items].sort(
@@ -441,8 +269,7 @@ export default function DocumentDetail() {
       style={{
         height: "100%",
         minHeight: 0,
-        alignSelf: "stretch",
-        overflow: "auto",
+        overflow: "hidden",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -454,10 +281,11 @@ export default function DocumentDetail() {
           display: "flex",
           flexDirection: "column",
           gap: "1.5rem",
-          minHeight: "100%",
+          minHeight: 0,
           flexShrink: 0,
           boxSizing: "border-box",
           paddingBottom: "1.5rem",
+          height: "100vh",
         }}
       >
         {/* Header */}
@@ -484,12 +312,14 @@ export default function DocumentDetail() {
           </button>
           <h1>Document Detail</h1>
         </div>
+
         <div
           style={{
             padding: "0 1.5rem",
             display: "flex",
             flexDirection: "column",
             flex: 1,
+            minHeight: 0,
           }}
         >
           {/* Loading and error messages */}
@@ -514,6 +344,7 @@ export default function DocumentDetail() {
                 overflow: "hidden",
               }}
             >
+              {/* Left panel */}
               <div
                 style={{
                   width: "55%",
@@ -588,11 +419,14 @@ export default function DocumentDetail() {
                   title="PDF Preview"
                 />
               </div>
+
+              {/* Right panel */}
               <div
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   width: "45%",
+                  minHeight: 0,
                 }}
               >
                 <div
@@ -646,222 +480,6 @@ export default function DocumentDetail() {
           )}
         </div>
       </div>
-
-      {/* Analyses list */}
-      {/* {!loading && !error && document && (
-        <>
-          <div style={{ padding: "2rem" }}>
-            
-
-            {analyses.length === 0 && (
-              <p style={{ color: "white" }}>No analyses yet.</p>
-            )}
-
-            {analyses.map((analysis, idx) => (
-              <div
-                key={analysis.id || idx}
-                style={{
-                  background: "white",
-                  borderRadius: 5,
-                  width: "100%",
-                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.06)",
-                  marginBottom: "1.25rem",
-                  display: "flex",
-                  flexDirection: "row",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 600,
-                    color: "#2d3748",
-                    fontSize: "3rem",
-                    paddingLeft: "1rem",
-                  }}
-                >
-                  {analyses.length - idx}
-                </span>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                    padding: "1rem",
-                    flex: 1,
-                  }}
-                >
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key !== "Enter" && e.key !== " ") return;
-                      e.preventDefault();
-                      const id = analysis.id ?? String(idx);
-                      setExpandedAnalysisId((prev) =>
-                        prev === id ? null : id,
-                      );
-                    }}
-                    onClick={() => {
-                      const id = analysis.id ?? String(idx);
-                      setExpandedAnalysisId((prev) =>
-                        prev === id ? null : id,
-                      );
-                    }}
-                    style={{
-                      width: "100%",
-                      textAlign: "left",
-                      background: "transparent",
-                      border: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {(() => {
-                      const id = analysis.id ?? String(idx);
-                      const isOpen = expandedAnalysisId === id;
-                      const summary = analysis?.result?.summary;
-                      const summarySnippet =
-                        typeof summary === "string"
-                          ? summary.trim().slice(0, 180)
-                          : "";
-
-                      return (
-                        <>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              gap: "1rem",
-                            }}
-                          >
-                            <div>
-                              <span
-                                style={{
-                                  color: "#4a5568",
-                                  fontSize: "0.8rem",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "0.5rem",
-                                }}
-                              >
-                                <ScheduleIcon />{" "}
-                                {formatDate(analysis.createdAt)}
-                              </span>
-                              
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (!analysis.id) return;
-                                handleDeleteAnalysis(analysis.id);
-                              }}
-                              disabled={
-                                !analysis.id ||
-                                deletingAnalysisId === analysis.id
-                              }
-                              style={{
-                                padding: "0.35rem 0.6rem",
-                                border: "none",
-                                borderRadius: 5,
-                                background: "transparent",
-                                cursor:
-                                  !analysis.id ||
-                                  deletingAnalysisId === analysis.id
-                                    ? "wait"
-                                    : "pointer",
-                                fontSize: "0.8rem",
-                              }}
-                            >
-                              <DeleteIcon color="error" />
-                            </button>
-                          </div>
-
-                          {summarySnippet && !isOpen && (
-                            <div
-                              style={{
-                                marginTop: 10,
-                                color: "#4a5568",
-                                fontSize: "0.95rem",
-                                lineHeight: 1.4,
-                                maxHeight: 56,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {summarySnippet}
-                              {String(summary).length > 180 ? "..." : ""}
-                            </div>
-                          )}
-
-                          <div
-                            style={{
-                              marginTop: 10,
-                              color: "#718096",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            {isOpen ? "Hide details" : "Show details"}
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-
-                  {(() => {
-                    const id = analysis.id ?? String(idx);
-                    const isOpen = expandedAnalysisId === id;
-                    if (!isOpen) return null;
-
-                    return (
-                      <>
-                        {analysis.userPrompt ? (
-                          <>
-                            <span
-                              style={{
-                                fontSize: "0.9rem",
-                                fontWeight: 600,
-                                marginTop: "0.75rem",
-                              }}
-                            >
-                              User prompt:
-                            </span>
-                            <div
-                              style={{
-                                background: "#f7fafc",
-                                border: "1px solid #e2e8f0",
-                                padding: "0.75rem",
-                                borderRadius: 5,
-                                color: "#2d3748",
-                                whiteSpace: "pre-wrap",
-                                fontSize: "0.9rem",
-                                lineHeight: 1.4,
-                              }}
-                            >
-                              {analysis.userPrompt}
-                            </div>
-                          </>
-                        ) : null}
-
-                        <h2
-                          className="response-title"
-                          style={{ fontSize: "1.25rem" }}
-                        >
-                          Analysis Result
-                        </h2>
-                        <AnalysisResultRenderer result={analysis.result} />
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {deleteError && <p style={{ color: "white" }}>{deleteError}</p>}
-        </>
-      )} */}
     </div>
   );
 }
