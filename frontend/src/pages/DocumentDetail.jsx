@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import authService from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
-import { formatDate } from "../utils";
+import { formatDate, sortAnalysesOldestFirst } from "../utils";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -14,12 +14,6 @@ import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import AnalysisResultRenderer from "../components/AnalysisResultRenderer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function sortAnalysesOldestFirst(items) {
-  return [...items].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
-}
 
 function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
   const scrollRef = useRef(null);
@@ -183,52 +177,6 @@ export default function DocumentDetail() {
     setDeletingAnalysisId(null);
   }, [documentId]);
 
-  const handleDeleteAnalysis = async (analysisId) => {
-    if (!analysisId) return;
-
-    setDeleteError(null);
-    setDeletingAnalysisId(analysisId);
-
-    try {
-      const tokenNow = authService.getToken();
-      if (!tokenNow) {
-        throw new Error("You are not authenticated");
-      }
-
-      const res = await fetch(`${API_BASE_URL}/analysis/${analysisId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${tokenNow}`,
-        },
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          logout();
-          return;
-        }
-        throw new Error(
-          data.error || data.message || "Failed to delete analysis",
-        );
-      }
-
-      setAnalyses((prev) => {
-        const next = prev.filter((a) => a.id !== analysisId);
-        setSelectedAnalysisId((current) => {
-          if (current !== analysisId) return current;
-          return sortAnalysesOldestFirst(next)[0]?.id ?? null;
-        });
-        return next;
-      });
-      setExpandedAnalysisId((prev) => (prev === analysisId ? null : prev));
-    } catch (e) {
-      setDeleteError(e.message || "Failed to delete analysis");
-    } finally {
-      setDeletingAnalysisId(null);
-    }
-  };
 
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;
@@ -471,6 +419,9 @@ export default function DocumentDetail() {
                         analysis={analyses.find(
                           (analysis) => analysis.id === selectedAnalysisId,
                         )}
+                        sortAnalysesOldestFirst={sortAnalysesOldestFirst}
+                        setAnalyses={setAnalyses}
+                        setSelectedAnalysisId={setSelectedAnalysisId}
                       />
                     )}
                   </>

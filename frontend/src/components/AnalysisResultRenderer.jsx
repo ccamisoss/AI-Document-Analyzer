@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { formatDate } from "../utils";
+import { formatDate, sortAnalysesOldestFirst } from "../utils";
+import authService from "../services/auth.service";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-export default function AnalysisResultRenderer({ analysis }) {
+export default function AnalysisResultRenderer({
+  analysis,
+  setAnalyses,
+  setSelectedAnalysisId,
+}) {
   const summary = analysis?.result?.summary;
   const keyPoints = analysis?.result?.keyPoints;
   const insights = analysis?.result?.insights;
@@ -15,6 +22,54 @@ export default function AnalysisResultRenderer({ analysis }) {
   const userPrompt = analysis?.userPrompt;
   const createdAt = analysis?.createdAt;
   const [showUserPrompt, setShowUserPrompt] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deletingAnalysisId, setDeletingAnalysisId] = useState(null);
+
+  const handleDeleteAnalysis = async (analysisId) => {
+    if (!analysisId) return;
+
+    setDeleteError(null);
+    setDeletingAnalysisId(analysisId);
+
+    try {
+      const tokenNow = authService.getToken();
+      if (!tokenNow) {
+        throw new Error("You are not authenticated");
+      }
+
+      const res = await fetch(`${API_BASE_URL}/analysis/${analysisId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokenNow}`,
+        },
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+        throw new Error(
+          data.error || data.message || "Failed to delete analysis",
+        );
+      }
+
+      setAnalyses((prev) => {
+        const next = prev.filter((a) => a.id !== analysisId);
+        setSelectedAnalysisId((current) => {
+          if (current !== analysisId) return current;
+          return sortAnalysesOldestFirst(next)[0]?.id ?? null;
+        });
+        return next;
+      });
+    } catch (e) {
+      setDeleteError(e.message || "Failed to delete analysis");
+    } finally {
+      setDeletingAnalysisId(null);
+    }
+  };
 
   const handleShowUserPrompt = () => {
     setShowUserPrompt(!showUserPrompt);

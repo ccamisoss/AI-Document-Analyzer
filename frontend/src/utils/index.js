@@ -9,3 +9,9 @@ export function formatDate(value) {
     minute: "2-digit",
   });
 }
+
+export function sortAnalysesOldestFirst(items) {
+  return [...items].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
