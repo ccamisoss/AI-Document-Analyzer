@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { formatDate } from "../utils";
+
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { formatDate } from "../utils";
 
 export default function AnalysisResultRenderer({ analysis }) {
   const summary = analysis?.result?.summary;
@@ -42,7 +43,6 @@ export default function AnalysisResultRenderer({ analysis }) {
             margin: 0,
           }}
         >
-          {" "}
           <ScheduleIcon /> {formatDate(createdAt)}
         </span>
         <button
@@ -57,6 +57,7 @@ export default function AnalysisResultRenderer({ analysis }) {
           <DeleteIcon />
         </button>
       </div>
+
       <div
         style={{
           overflowY: "auto",
@@ -81,7 +82,7 @@ export default function AnalysisResultRenderer({ analysis }) {
                 alignItems: "center",
                 border: "1px solid #757575 ",
                 borderRadius: "5px",
-                padding: "0.5rem",
+                padding: "0.5rem 1rem",
                 boxSizing: "border-box",
               }}
             >
@@ -100,14 +101,18 @@ export default function AnalysisResultRenderer({ analysis }) {
                 {showUserPrompt ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </button>
             </div>
-            {!showUserPrompt && (
+            {showUserPrompt && (
               <div
                 style={{
-                  padding: "0.5rem",
+                  padding: "0.5rem 1rem",
                   boxSizing: "border-box",
                   border: "1px solid #757575",
                   borderRadius: "5px",
                   backgroundColor: "#1a1a1a",
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                  fontSize: "0.9rem",
+                  scrollbarWidth: "thin",
                 }}
               >
                 <p style={{ color: "#ffffff" }}>{userPrompt}</p>
@@ -123,7 +128,7 @@ export default function AnalysisResultRenderer({ analysis }) {
             flexDirection: "column",
             gap: "0.5rem",
             boxSizing: "border-box",
-            marginTop: "1rem",
+            marginTop: "1.5rem",
           }}
         >
           <h3 style={{ margin: 0 }}>Result</h3>
