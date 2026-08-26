@@ -10,82 +10,186 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function AnalysisResultRenderer({ result }) {
-  const summary = result?.summary;
-  const keyPoints = result?.keyPoints;
-  const insights = result?.insights;
-  const notes = result?.notes;
-  const answers = result?.answers;
+function AnalysisResultRenderer({ analysis }) {
+  const summary = analysis?.result?.summary;
+  const keyPoints = analysis?.result?.keyPoints;
+  const insights = analysis?.result?.insights;
+  const notes = analysis?.result?.notes;
+  const answers = analysis?.result?.answers;
+  const userPrompt = analysis?.userPrompt;
+  const createdAt = analysis?.createdAt;
+  const [showUserPrompt, setShowUserPrompt] = useState(false);
 
-  if (!summary && !keyPoints && !insights && !notes && !answers) {
-    return null;
-  }
+  const handleShowUserPrompt = () => {
+    setShowUserPrompt(!showUserPrompt);
+  };
 
   return (
-    <div
-      className="response-panel success-panel"
-      style={{ width: "100%", marginTop: "1rem" }}
-    >
-      {summary && summary.trim() && (
-        <section className="response-section">
-          <h3 className="section-title">Summary</h3>
-          <div className="summary-text">
-            {summary.split("\n").map((line, idx) => (
-              <p key={idx}>{line || "\u00A0"}</p>
-            ))}
+    <div style={{ overflowY: "auto", overflowX: "hidden", flex: 1 }}>
+      {/* Date and delete button */}
+      <div
+        style={{
+          padding: "1rem",
+          borderBlock: "1px solid #2d2d2d",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            color: "#4a5568",
+            fontFamily: "monospace",
+            fontSize: "0.8rem",
+            margin: 0,
+          }}
+        >
+          {" "}
+          <ScheduleIcon /> {formatDate(createdAt)}
+        </span>
+        <button
+          style={{
+            border: "none",
+            background: "transparent",
+            padding: 0,
+            cursor: "pointer",
+          }}
+          onClick={() => handleDeleteAnalysis(analysis.id)}
+        >
+          <DeleteIcon />
+        </button>
+      </div>
+
+      {/* Sent Prompt */}
+      {userPrompt && (
+        <div
+          style={{
+            padding: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              border: "1px solid #757575 ",
+              borderRadius: "5px",
+              padding: "0.5rem",
+              boxSizing: "border-box",
+            }}
+          >
+            <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
+              Sent Prompt
+            </span>
+            <button
+              style={{
+                border: "none",
+                background: "transparent",
+                padding: 0,
+                cursor: "pointer",
+              }}
+              onClick={handleShowUserPrompt}
+            >
+              {showUserPrompt ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </button>
           </div>
-        </section>
+          {!showUserPrompt && (
+            <div
+              style={{
+                padding: "0.5rem",
+                boxSizing: "border-box",
+                border: "1px solid #757575",
+                borderRadius: "5px",
+                backgroundColor: "#1a1a1a",
+              }}
+            >
+              <p style={{ color: "#ffffff" }}>{userPrompt}</p>
+            </div>
+          )}
+        </div>
       )}
 
-      {Array.isArray(keyPoints) && keyPoints.length > 0 && (
-        <section className="response-section">
-          <h3 className="section-title">Key Points</h3>
-          <ul className="bullet-list">
-            {keyPoints.map((point, idx) => (
-              <li key={idx}>{point}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* Result */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+          padding: "1rem",
+          boxSizing: "border-box",
+        }}
+      >
+        <h3 style={{ margin: 0 }}>Result</h3>
+        <div style={{ width: "100%" }}>
+          {summary && summary.trim() && (
+            <section className="response-section">
+              <div className="summary-text">
+                {summary.split("\n").map((line, idx) => (
+                  <p key={idx}>{line || "\u00A0"}</p>
+                ))}
+              </div>
+            </section>
+          )}
 
-      {Array.isArray(insights) && insights.length > 0 && (
-        <section className="response-section">
-          <h3 className="section-title">Insights</h3>
-          <ul className="bullet-list">
-            {insights.map((insight, idx) => (
-              <li key={idx}>{insight}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {Array.isArray(keyPoints) && keyPoints.length > 0 && (
+            <section className="response-section">
+              <span className="section-title">Key Points</span>
+              <ul className="bullet-list">
+                {keyPoints.map((point, idx) => (
+                  <li key={idx}>{point}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {notes && String(notes).trim() && (
-        <section className="response-section">
-          <h3 className="section-title">Notes</h3>
-          <p className="notes-text">{notes}</p>
-        </section>
-      )}
+          {Array.isArray(insights) && insights.length > 0 && (
+            <section className="response-section">
+              <h3 className="section-title">Insights</h3>
+              <ul className="bullet-list">
+                {insights.map((insight, idx) => (
+                  <li key={idx}>{insight}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {Array.isArray(answers) && answers.length > 0 && (
-        <section className="response-section">
-          <h3 className="section-title">Answers</h3>
-          <ol className="numbered-list">
-            {answers.map((answer, idx) => (
-              <li key={idx}>{answer}</li>
-            ))}
-          </ol>
-        </section>
-      )}
+          {notes && String(notes).trim() && (
+            <section className="response-section">
+              <h3 className="section-title">Notes</h3>
+              <p className="notes-text">{notes}</p>
+            </section>
+          )}
+
+          {Array.isArray(answers) && answers.length > 0 && (
+            <section className="response-section">
+              <h3 className="section-title">Answers</h3>
+              <ol className="numbered-list">
+                {answers.map((answer, idx) => (
+                  <li key={idx}>{answer}</li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-function sortAnalysesNewestFirst(items) {
+function sortAnalysesOldestFirst(items) {
   return [...items].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 }
 
@@ -93,8 +197,8 @@ function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
   const scrollRef = useRef(null);
 
   const sortedAnalyses = useMemo(
-    () => sortAnalysesNewestFirst(analyses),
-    [analyses],
+    () => sortAnalysesOldestFirst(analyses),
+    [analyses, sortAnalysesOldestFirst],
   );
 
   const scrollTabs = (direction) => {
@@ -107,6 +211,10 @@ function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
         type="button"
         className="analysis-tabs-arrow"
         onClick={() => scrollTabs(-1)}
+        disabled={
+          selectedAnalysisId === sortedAnalyses[0].id ||
+          sortedAnalyses.length === 1
+        }
         aria-label="Scroll tabs left"
       >
         <ChevronLeftOutlinedIcon fontSize="small" />
@@ -114,7 +222,7 @@ function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
       <div className="analysis-tabs-scroll" ref={scrollRef}>
         {sortedAnalyses.map((analysis, idx) => {
           const isActive = selectedAnalysisId === analysis.id;
-          const label = `Análisis ${sortedAnalyses.length - idx}`;
+          const label = `Analysis ${analysis.id}`;
 
           return (
             <button
@@ -132,6 +240,10 @@ function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
         type="button"
         className="analysis-tabs-arrow"
         onClick={() => scrollTabs(1)}
+        disabled={
+          selectedAnalysisId === sortedAnalyses[sortedAnalyses.length - 1].id ||
+          sortedAnalyses.length === 1
+        }
         aria-label="Scroll tabs right"
       >
         <ChevronRightOutlinedIcon fontSize="small" />
@@ -154,6 +266,12 @@ export default function DocumentDetail() {
   const documentId = params.get("id");
   const token = useMemo(() => authService.getToken(), []);
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(null);
+
+  const setAnalysis = (analysisId) => {
+    setSelectedAnalysisId(analysisId);
+    // change ulr id
+    navigate(`/documentDetail?id=${documentId}&analysis=${analysisId}`);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -207,8 +325,18 @@ export default function DocumentDetail() {
           ? analysesJson.data
           : [];
         setAnalyses(loadedAnalyses);
+        const analysisId = params.get("analysis");
+        if (analysisId) {
+          setAnalysis(analysisId);
+        }
         if (loadedAnalyses.length > 0) {
-          setSelectedAnalysisId(sortAnalysesNewestFirst(loadedAnalyses)[0].id);
+          setSelectedAnalysisId(
+            sortAnalysesOldestFirst(loadedAnalyses)[loadedAnalyses.length - 1]
+              .id,
+          );
+          navigate(
+            `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(loadedAnalyses)[loadedAnalyses.length - 1].id}`,
+          );
         }
       } catch (e) {
         console.log("Error loading document details:", e);
@@ -262,7 +390,7 @@ export default function DocumentDetail() {
         const next = prev.filter((a) => a.id !== analysisId);
         setSelectedAnalysisId((current) => {
           if (current !== analysisId) return current;
-          return sortAnalysesNewestFirst(next)[0]?.id ?? null;
+          return sortAnalysesOldestFirst(next)[0]?.id ?? null;
         });
         return next;
       });
@@ -391,7 +519,7 @@ export default function DocumentDetail() {
                   width: "55%",
                   display: "flex",
                   flexDirection: "column",
-                  borderRight: "1px solid #e2e8f0",
+                  borderRight: "1px solid #2d2d2d",
                 }}
               >
                 <div
@@ -402,6 +530,7 @@ export default function DocumentDetail() {
                     gap: "0.5rem",
                     padding: "1rem",
                     boxSizing: "border-box",
+                    height: "70px",
                   }}
                 >
                   <span
@@ -429,10 +558,12 @@ export default function DocumentDetail() {
                     display: "flex",
                     alignItems: "center",
                     gap: "0.9rem",
-                    padding: "0 1rem 1rem 1rem",
+                    padding: "1rem 1rem 1rem 1rem",
                     boxSizing: "border-box",
                     fontFamily: "monospace",
-                    fontSize: "0.75rem",
+                    fontSize: "0.8rem",
+                    borderTop: "1px solid #2d2d2d",
+                    height: "50px",
                   }}
                 >
                   <span
@@ -470,12 +601,14 @@ export default function DocumentDetail() {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "1rem",
-                    borderBottom: "1px solid #e2e8f0",
+                    borderBottom: "1px solid #2d2d2d",
+                    height: "71px",
+                    boxSizing: "border-box",
                   }}
                 >
-                  <span style={{ fontSize: "1.2rem", fontWeight: 600 }}>
+                  <h2 style={{ fontSize: "1.2rem", fontWeight: 600 }}>
                     Analyses
-                  </span>
+                  </h2>
                   <button
                     onClick={() =>
                       navigate("/analyze", { state: { document } })
@@ -497,19 +630,15 @@ export default function DocumentDetail() {
                     <AnalysisTabs
                       analyses={analyses}
                       selectedAnalysisId={selectedAnalysisId}
-                      onSelect={setSelectedAnalysisId}
+                      onSelect={setAnalysis}
                     />
-                    <div style={{ padding: "1rem", overflow: "auto", flex: 1 }}>
-                      {selectedAnalysisId && (
-                        <AnalysisResultRenderer
-                          result={
-                            analyses.find(
-                              (analysis) => analysis.id === selectedAnalysisId,
-                            )?.result
-                          }
-                        />
-                      )}
-                    </div>
+                    {selectedAnalysisId && (
+                      <AnalysisResultRenderer
+                        analysis={analyses.find(
+                          (analysis) => analysis.id === selectedAnalysisId,
+                        )}
+                      />
+                    )}
                   </>
                 )}
               </div>
