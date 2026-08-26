@@ -156,7 +156,7 @@ const createAnalysisAndDocument = async ({
   return {
     status: "success",
     data: {
-      analysis: analysis.result,
+      analysis: analysis,
       document: document,
     },
   };
@@ -303,7 +303,7 @@ const createAnalysis = async ({
   return {
     status: "success",
     data: {
-      analysis: analysis.result,
+      analysis: analysis,
       document,
     },
   };

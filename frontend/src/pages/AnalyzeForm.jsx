@@ -110,7 +110,9 @@ function AnalyzeForm() {
         setTimeout(resolve, TEST_REDIRECT_DELAY_MS),
       );
 
-      navigate(`/documentDetail?id=${data.data.document.id}`);
+      navigate(
+        `/documentDetail?id=${data.data.document.id}&analysis=${data.data.analysis.id}`,
+      );
       setFile(null);
       setPrompt("");
       e.target.reset();
