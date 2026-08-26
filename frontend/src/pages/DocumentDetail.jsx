@@ -17,7 +17,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function sortAnalysesOldestFirst(items) {
   return [...items].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 }
 
@@ -159,11 +159,11 @@ export default function DocumentDetail() {
         }
         if (loadedAnalyses.length > 0) {
           setSelectedAnalysisId(
-            sortAnalysesOldestFirst(loadedAnalyses)[loadedAnalyses.length - 1]
+            sortAnalysesOldestFirst(loadedAnalyses)[0]
               .id,
           );
           navigate(
-            `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(loadedAnalyses)[loadedAnalyses.length - 1].id}`,
+            `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(loadedAnalyses)[0].id}`,
           );
         }
       } catch (e) {
