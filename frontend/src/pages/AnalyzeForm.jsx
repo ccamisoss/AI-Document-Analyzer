@@ -168,6 +168,7 @@ function AnalyzeForm() {
                 style={{
                   flex: 1,
                   borderRadius: 5,
+                  border: "none",
                 }}
                 title="PDF Preview"
               />
