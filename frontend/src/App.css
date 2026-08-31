@@ -54,14 +54,6 @@
   cursor: not-allowed;
 }
 
-.file-name {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0;
-  word-break: break-word;
-  text-align: center;
-}
-
 .prompt-textarea {
   padding: 0.75rem;
   box-sizing: border-box;
@@ -89,11 +81,9 @@
   font-size: 1rem;
   font-weight: 500;
   background-color: transparent;
-  /* color: white; */
   border: 1px solid;
   border-radius: 5px;
   cursor: pointer;
-  /* transition: background-color 0.25s; */
   min-width: 150px;
 }
 
@@ -104,100 +94,4 @@
 .submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.success-message {
-  padding: 1rem;
-  background-color: #efe;
-  color: #3c3;
-  border: 1px solid #cfc;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-.response-panel {
-  border-radius: 5px;
-  margin-top: 1rem;
-}
-
-.warning-message {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-}
-
-.response-title {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.response-section {
-  margin-bottom: 2rem;
-}
-
-.response-section:last-child {
-  margin-bottom: 0;
-}
-
-.section-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.summary-text {
-  line-height: 1.6;
-  color: #555;
-}
-
-.summary-text p {
-  margin: 0.5rem 0;
-}
-
-.summary-text p:first-child {
-  margin-top: 0;
-}
-
-.summary-text p:last-child {
-  margin-bottom: 0;
-}
-
-.bullet-list {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-  color: #555;
-  line-height: 1.6;
-}
-
-.bullet-list li {
-  margin-bottom: 0.5rem;
-}
-
-.bullet-list li:last-child {
-  margin-bottom: 0;
-}
-
-.notes-text {
-  margin: 0.5rem 0 0 0;
-  line-height: 1.6;
-  color: #555;
-}
-
-.numbered-list {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-  color: #555;
-  line-height: 1.6;
-}
-
-.numbered-list li {
-  margin-bottom: 0.5rem;
-}
-
-.numbered-list li:last-child {
-  margin-bottom: 0;
 }

@@ -11,7 +11,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 
-import AnalysisResultRenderer from "../components/AnalysisResultRenderer";
+import AnalysisResult from "../components/AnalysisResult";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -415,7 +415,7 @@ export default function DocumentDetail() {
                       onSelect={setAnalysis}
                     />
                     {selectedAnalysisId && (
-                      <AnalysisResultRenderer
+                      <AnalysisResult
                         analysis={analyses.find(
                           (analysis) => analysis.id === selectedAnalysisId,
                         )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { formatDate, sortAnalysesOldestFirst } from "../utils";
-import authService from "../services/auth.service";
+import { formatDate, sortAnalysesOldestFirst } from "../../utils";
+import authService from "../../services/auth.service";
+import styles from "./index.module.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -9,7 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-export default function AnalysisResultRenderer({
+export default function AnalysisResult({
   analysis,
   setAnalyses,
   setSelectedAnalysisId,
@@ -78,119 +79,46 @@ export default function AnalysisResultRenderer({
   return (
     <>
       {/* Date and delete button */}
-      <div
-        style={{
-          padding: "1rem",
-          borderBlock: "1px solid #2d2d2d",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "#4a5568",
-            fontFamily: "monospace",
-            fontSize: "0.8rem",
-            margin: 0,
-          }}
-        >
+      <div className={styles.firstContainer}>
+        <span className={styles.date}>
           <ScheduleIcon /> {formatDate(createdAt)}
         </span>
         <button
-          style={{
-            border: "none",
-            background: "transparent",
-            padding: 0,
-            cursor: "pointer",
-          }}
+          className={styles.deleteButton}
           onClick={() => handleDeleteAnalysis(analysis.id)}
         >
           <DeleteIcon />
         </button>
       </div>
 
-      <div
-        style={{
-          overflowY: "auto",
-          overflowX: "hidden",
-          flex: 1,
-          padding: "1rem",
-        }}
-      >
+      <div className={styles.secondContainer}>
         {/* Sent Prompt */}
         {userPrompt && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                border: "1px solid #757575 ",
-                borderRadius: "5px",
-                padding: "0.5rem 1rem",
-                boxSizing: "border-box",
-              }}
-            >
-              <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
-                Sent Prompt
-              </span>
+          <div className={styles.userPromptContainer}>
+            <div>
+              <span className={styles.userPromptHeader}>Sent Prompt</span>
               <button
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
+                className={styles.userPromptButton}
                 onClick={handleShowUserPrompt}
               >
                 {showUserPrompt ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </button>
             </div>
             {showUserPrompt && (
-              <div
-                style={{
-                  padding: "0.5rem 1rem",
-                  boxSizing: "border-box",
-                  border: "1px solid #757575",
-                  borderRadius: "5px",
-                  backgroundColor: "#1a1a1a",
-                  maxHeight: "200px",
-                  overflowY: "auto",
-                  fontSize: "0.9rem",
-                  scrollbarWidth: "thin",
-                }}
-              >
-                <p style={{ color: "#ffffff" }}>{userPrompt}</p>
+              <div className={styles.userPromptContent}>
+                <p>{userPrompt}</p>
               </div>
             )}
           </div>
         )}
 
         {/* Result */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-            boxSizing: "border-box",
-            marginTop: "1.5rem",
-          }}
-        >
-          <h3 style={{ margin: 0 }}>Result</h3>
+        <div className={styles.resultContainer}>
+          <h3 className={styles.resultHeader}>Result</h3>
           <div style={{ width: "100%" }}>
             {summary && summary.trim() && (
-              <section className="response-section">
-                <div className="summary-text">
+              <section className={styles.responseSection}>
+                <div className={styles.summaryText}>
                   {summary.split("\n").map((line, idx) => (
                     <p key={idx}>{line || "\u00A0"}</p>
                   ))}
@@ -199,9 +127,9 @@ export default function AnalysisResultRenderer({
             )}
 
             {Array.isArray(keyPoints) && keyPoints.length > 0 && (
-              <section className="response-section">
-                <span className="section-title">Key Points</span>
-                <ul className="bullet-list">
+              <section className={styles.responseSection}>
+                <span className={styles.sectionTitle}>Key Points</span>
+                <ul className={styles.bulletList}>
                   {keyPoints.map((point, idx) => (
                     <li key={idx}>{point}</li>
                   ))}
@@ -210,9 +138,9 @@ export default function AnalysisResultRenderer({
             )}
 
             {Array.isArray(insights) && insights.length > 0 && (
-              <section className="response-section">
-                <h3 className="section-title">Insights</h3>
-                <ul className="bullet-list">
+              <section className={styles.responseSection}>
+                <h3 className={styles.sectionTitle}>Insights</h3>
+                <ul className={styles.bulletList}>
                   {insights.map((insight, idx) => (
                     <li key={idx}>{insight}</li>
                   ))}
@@ -221,16 +149,16 @@ export default function AnalysisResultRenderer({
             )}
 
             {notes && String(notes).trim() && (
-              <section className="response-section">
-                <h3 className="section-title">Notes</h3>
-                <p className="notes-text">{notes}</p>
+              <section className={styles.responseSection}>
+                <h3 className={styles.sectionTitle}>Notes</h3>
+                <p className={styles.notesText}>{notes}</p>
               </section>
             )}
 
             {Array.isArray(answers) && answers.length > 0 && (
-              <section className="response-section">
-                <h3 className="section-title">Answers</h3>
-                <ol className="numbered-list">
+              <section className={styles.responseSection}>
+                <h3 className={styles.sectionTitle}>Answers</h3>
+                <ol className={styles.numberedList}>
                   {answers.map((answer, idx) => (
                     <li key={idx}>{answer}</li>
                   ))}
