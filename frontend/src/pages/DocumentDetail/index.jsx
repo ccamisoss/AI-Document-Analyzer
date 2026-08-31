@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import authService from "../services/auth.service";
+import authService from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../hooks/useSession";
-import { formatDate, sortAnalysesOldestFirst } from "../utils";
+import { useSession } from "../../hooks/useSession";
+import { formatDate, sortAnalysesOldestFirst } from "../../utils";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -11,68 +11,12 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 
-import AnalysisResult from "../components/AnalysisResult";
+import AnalysisResult from "../../components/AnalysisResult";
+import AnalysisTabs from "../../components/AnalysisTabs";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function AnalysisTabs({ analyses, selectedAnalysisId, onSelect }) {
-  const scrollRef = useRef(null);
 
-  const sortedAnalyses = useMemo(
-    () => sortAnalysesOldestFirst(analyses),
-    [analyses, sortAnalysesOldestFirst],
-  );
-
-  const scrollTabs = (direction) => {
-    scrollRef.current?.scrollBy({ left: direction * 140, behavior: "smooth" });
-  };
-
-  return (
-    <div className="analysis-tabs-bar">
-      <button
-        type="button"
-        className="analysis-tabs-arrow"
-        onClick={() => scrollTabs(-1)}
-        disabled={
-          selectedAnalysisId === sortedAnalyses[0].id ||
-          sortedAnalyses.length === 1
-        }
-        aria-label="Scroll tabs left"
-      >
-        <ChevronLeftOutlinedIcon fontSize="small" />
-      </button>
-      <div className="analysis-tabs-scroll" ref={scrollRef}>
-        {sortedAnalyses.map((analysis, idx) => {
-          const isActive = selectedAnalysisId === analysis.id;
-          const label = `Analysis ${analysis.id}`;
-
-          return (
-            <button
-              key={analysis.id}
-              type="button"
-              className={`analysis-tab${isActive ? " analysis-tab--active" : ""}`}
-              onClick={() => onSelect(analysis.id)}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </div>
-      <button
-        type="button"
-        className="analysis-tabs-arrow"
-        onClick={() => scrollTabs(1)}
-        disabled={
-          selectedAnalysisId === sortedAnalyses[sortedAnalyses.length - 1].id ||
-          sortedAnalyses.length === 1
-        }
-        aria-label="Scroll tabs right"
-      >
-        <ChevronRightOutlinedIcon fontSize="small" />
-      </button>
-    </div>
-  );
-}
 
 export default function DocumentDetail() {
   const [document, setDocument] = useState(null);
@@ -152,10 +96,7 @@ export default function DocumentDetail() {
           setAnalysis(analysisId);
         }
         if (loadedAnalyses.length > 0) {
-          setSelectedAnalysisId(
-            sortAnalysesOldestFirst(loadedAnalyses)[0]
-              .id,
-          );
+          setSelectedAnalysisId(sortAnalysesOldestFirst(loadedAnalyses)[0].id);
           navigate(
             `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(loadedAnalyses)[0].id}`,
           );
@@ -176,7 +117,6 @@ export default function DocumentDetail() {
     setDeleteError(null);
     setDeletingAnalysisId(null);
   }, [documentId]);
-
 
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;

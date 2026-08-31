@@ -1,0 +1,85 @@
+.analysisTabsBar {
+  display: flex;
+  align-items: stretch;
+  background-color: #1a1a1a;
+  min-height: 50px;
+}
+
+.analysisTabsArrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.analysisTabsArrow:disabled {
+  opacity: 0.5;
+  cursor: default
+}
+
+.analysisTabsArrow:hover {
+  color: #ffffff;
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.analysisTabsScroll {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  gap: 1.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 0.5rem;
+}
+
+.analysisTabsScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.analysisTab {
+  flex-shrink: 0;
+  position: relative;
+  padding: 0.85rem 0.25rem 0.75rem;
+  border: none;
+  border-radius: 0;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.analysisTab:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.analysisTabActive {
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.analysisTabActive:hover {
+  border-color: transparent !important;
+}
+
+.analysisTabActive::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: #ffffff !important;
+}
