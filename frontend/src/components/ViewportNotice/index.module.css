@@ -1,0 +1,41 @@
+.overlay {
+  display: none;
+}
+
+@media (max-width: 599.99px) {
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    background: rgb(17, 24, 39);
+  }
+
+  .card {
+    width: min(100%, 26rem);
+    padding: 2rem;
+    box-sizing: border-box;
+    text-align: center;
+    background: white;
+    border: 1px solid black;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .title {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .message {
+    margin: 1rem 0 0;
+    color: #4b5563;
+    font-size: 1rem;
+  }
+}
