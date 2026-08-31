@@ -1,14 +1,13 @@
 import { Navigate } from "react-router-dom";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "../../hooks/useSession";
+import Loader from "../Loader";
 
 export default function GuestRoute({ children }) {
   const { ready, isAuthenticated } = useSession();
 
   if (!ready) {
     return (
-      <div style={{ color: "white", padding: "2rem", textAlign: "center" }}>
-        Loading…
-      </div>
+      <Loader />
     );
   }
 
