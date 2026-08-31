@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import authService from "../services/auth.service";
-import { useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
 import { formatDate } from "../utils";
+
+import Loader from "../components/Loader";
+import ErrorMessage from "../components/ErrorMessage";
 
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
@@ -51,7 +54,7 @@ export default function Dashboard() {
       } catch (e) {
         setError(e.message || "Failed to load documents");
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
@@ -84,11 +87,42 @@ export default function Dashboard() {
         Dashboard
       </h1>
 
-      {loading && <p style={{ color: "white" }}>Loading documents...</p>}
-      {error && <p style={{ color: "white" }}>{error}</p>}
+      {loading && <Loader text="Loading documents..." />}
+      {error && <ErrorMessage message={error} isFullHeight={true} />}
 
       {!loading && !error && documents.length === 0 && (
-        <p style={{ color: "white" }}>No documents yet.</p>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            gap: "1rem",
+          }}
+        >
+          <ErrorMessage message="No documents yet." />
+          <Link
+            to="/analyze"
+            style={{
+              textDecoration: "none",
+              color: "white",
+              fontSize: "1.25rem",
+              fontWeight: 500,
+              backgroundColor: "black",
+              padding: "0.5rem 1rem",
+              borderRadius: 5,
+              width: "fit-content",
+              margin: "0 auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+            }}
+          >
+            Analyze a document
+          </Link>
+        </div>
       )}
 
       {!loading && !error && documents.length > 0 && (
@@ -98,6 +132,7 @@ export default function Dashboard() {
             flexDirection: "column",
             gap: "1rem",
             padding: "0 1.5rem",
+            paddingBottom: "1.5rem",
           }}
         >
           {documents.map((doc) => (
@@ -124,7 +159,11 @@ export default function Dashboard() {
                 }}
               >
                 <DescriptionOutlinedIcon
-                  style={{ fill: "#667eea", fontSize: "2.5rem", padding: "0 0.5rem" }}
+                  style={{
+                    fill: "#667eea",
+                    fontSize: "2.5rem",
+                    padding: "0 0.5rem",
+                  }}
                 />
                 <div
                   style={{
