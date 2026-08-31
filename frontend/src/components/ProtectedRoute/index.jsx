@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "../../hooks/useSession";
+import Loader from "../Loader";
 
 export default function ProtectedRoute({ children }) {
   const { ready, isAuthenticated } = useSession();
@@ -7,9 +8,7 @@ export default function ProtectedRoute({ children }) {
 
   if (!ready) {
     return (
-      <div style={{ color: "white", padding: "2rem", textAlign: "center" }}>
-        Loading…
-      </div>
+      <Loader />
     );
   }
 
