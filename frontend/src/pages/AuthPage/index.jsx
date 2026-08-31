@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import Login from "./Login";
-import Register from "./Register";
+import styles from "./index.module.css";
+
+import Login from "./components/Login";
+import Register from "./components/Register";
 
 export default function AuthPage() {
   const location = useLocation();
@@ -9,37 +11,25 @@ export default function AuthPage() {
   const authNavState = { state: location.state };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className={styles.container}>
       {showRegister ? <Register /> : <Login />}
-      <div style={{ textAlign: "center" }}>
+      <div className={styles.whiteContainer}>
         {showRegister ? (
-          <p style={{ margin: 0 }}>
+          <p>
             Already have an account?{" "}
             <button
               type="button"
               onClick={() => navigate("/login", authNavState)}
-              style={{
-                background: "none",
-                border: "none",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
             >
               Sign in
             </button>
           </p>
         ) : (
-          <p style={{ margin: 0 }}>
+          <p>
             Don&apos;t have an account?{" "}
             <button
               type="button"
               onClick={() => navigate("/register", authNavState)}
-              style={{
-                background: "none",
-                border: "none",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
             >
               Sign up
             </button>

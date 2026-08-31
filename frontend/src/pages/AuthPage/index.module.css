@@ -1,4 +1,28 @@
-.auth-container {
+/* AuthPage */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.whiteContainer {
+  text-align: center;
+}
+
+.whiteContainer p {
+  margin: 0;
+}
+
+.whiteContainer button {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+/* Login and Register */
+.authContainer {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,7 +31,7 @@
   background: linear-gradient(135deg, #667eea 0%, #4b81a2 100%);
 }
 
-.auth-card {
+.authCard {
   background: white;
   border-radius: 5px;
   padding: 2.5rem;
@@ -16,7 +40,7 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.auth-title {
+.authTitle {
   font-size: 2rem;
   font-weight: 600;
   color: #1a202c;
@@ -24,25 +48,25 @@
   text-align: center;
 }
 
-.auth-form {
+.authForm {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-label {
+.formLabel {
   font-size: 0.875rem;
   font-weight: 500;
   color: #4a5568;
 }
 
-.form-input {
+.formInput {
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
   border-radius: 5px;
@@ -50,24 +74,24 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-input:focus {
+.formInput:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-input:disabled {
+.formInput:disabled {
   background-color: #f7fafc;
   cursor: not-allowed;
 }
 
-.form-hint {
+.formHint {
   font-size: 0.75rem;
   color: #718096;
   margin-top: -0.25rem;
 }
 
-.auth-button {
+.authButton {
   padding: 0.875rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -80,21 +104,21 @@
   margin-top: 0.5rem;
 }
 
-.auth-button:hover:not(:disabled) {
+.authButton:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
 }
 
-.auth-button:active:not(:disabled) {
+.authButton:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.auth-button:disabled {
+.authButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.error-message {
+.errorMessage {
   padding: 0.75rem;
   background-color: #fed7d7;
   color: #c53030;

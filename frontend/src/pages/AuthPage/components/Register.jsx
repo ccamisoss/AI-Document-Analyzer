@@ -1,20 +1,20 @@
 import { useState } from "react";
-import authService from "../services/auth.service";
-import "./Auth.css";
+import authService from "../../../services/auth.service";
+import styles from "../index.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "../../../hooks/useSession";
 
-function Login() {
+function Register() {
   const { login: setSession } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from ?? "/";
 
-  const handleLoginSuccess = (userData, token) => {
+  const handleRegisterSuccess = (userData, token) => {
     setSession(userData, token);
     navigate(from, { replace: true });
   };
@@ -25,24 +25,24 @@ function Login() {
     setError(null);
 
     try {
-      const result = await authService.login(email, password);
+      const result = await authService.register(email, password);
 
-      handleLoginSuccess(result.user, result.token);
+      handleRegisterSuccess(result.user, result.token);
     } catch (err) {
-      setError(err.message || "Error signing in");
+      setError(err.message || "Error registering user");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1 className="auth-title">Sign In</h1>
+    <div className={styles.authContainer}>
+      <div className={styles.authCard}>
+        <h1 className={styles.authTitle}>Sign Up</h1>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
+        <form onSubmit={handleSubmit} className={styles.authForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="email" className={styles.formLabel}>
               Email
             </label>
             <input
@@ -51,14 +51,14 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              className="form-input"
+              className={styles.formInput}
               placeholder="your@email.com"
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
+          <div className={styles.formGroup}>
+            <label htmlFor="password" className={styles.formLabel}>
               Password
             </label>
             <input
@@ -67,20 +67,24 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="form-input"
-              placeholder="••••••••"
+              className={styles.formInput}
+              placeholder="Minimum 8 characters"
               required
+              minLength={8}
             />
+            <small className={styles.formHint}>
+              Password must be at least 8 characters
+            </small>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="auth-button"
+            className={styles.authButton}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Registering..." : "Sign Up"}
           </button>
         </form>
       </div>
@@ -88,4 +92,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
