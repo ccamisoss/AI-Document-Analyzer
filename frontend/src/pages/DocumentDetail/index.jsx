@@ -3,29 +3,25 @@ import authService from "../../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../hooks/useSession";
 import { formatDate, sortAnalysesOldestFirst } from "../../utils";
+import styles from "./index.module.css";
+
+import AnalysisResult from "../../components/AnalysisResult";
+import AnalysisTabs from "../../components/AnalysisTabs";
+import Loader from "../../components/Loader";
+import ErrorMessage from "../../components/ErrorMessage";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
-import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
-
-import AnalysisResult from "../../components/AnalysisResult";
-import AnalysisTabs from "../../components/AnalysisTabs";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-
 
 export default function DocumentDetail() {
   const [document, setDocument] = useState(null);
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedAnalysisId, setExpandedAnalysisId] = useState(null);
-  const [deleteError, setDeleteError] = useState(null);
-  const [deletingAnalysisId, setDeletingAnalysisId] = useState(null);
   const navigate = useNavigate();
   const { logout } = useSession();
   const params = new URLSearchParams(window.location.search);
@@ -112,12 +108,6 @@ export default function DocumentDetail() {
     if (documentId) load();
   }, [documentId, token, logout]);
 
-  useEffect(() => {
-    setExpandedAnalysisId(null);
-    setDeleteError(null);
-    setDeletingAnalysisId(null);
-  }, [documentId]);
-
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;
 
@@ -147,152 +137,41 @@ export default function DocumentDetail() {
       }
 
       navigate("/");
-    } catch (e) {
-      setDeleteError(e.message || "Failed to delete document");
-    }
+    } catch (e) {}
   };
 
   return (
-    <div
-      style={{
-        height: "100%",
-        minHeight: 0,
-        overflow: "hidden",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem",
-          minHeight: 0,
-          flexShrink: 0,
-          boxSizing: "border-box",
-          paddingBottom: "1.5rem",
-          height: "100vh",
-        }}
-      >
+    <div className={styles.mainContainer}>
+      <div className={styles.subContainer}>
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "1rem",
-            padding: "1rem 1rem 0.75rem 1rem",
-            flexShrink: 0,
-            backgroundColor: "white",
-            borderBottom: "1px solid black",
-          }}
-        >
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-            }}
-          >
+        <div className={styles.headerContainer}>
+          <button onClick={() => navigate("/")}>
             <KeyboardBackspaceIcon />
           </button>
           <h1>Document Detail</h1>
         </div>
 
-        <div
-          style={{
-            padding: "0 1.5rem",
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            minHeight: 0,
-          }}
-        >
+        <div className={styles.contentContainer}>
           {/* Loading and error messages */}
-          {loading && <p style={{ color: "white" }}>Loading...</p>}
-          {error && <p style={{ color: "white" }}>{error}</p>}
+          {loading && <Loader />}
+          {error && <ErrorMessage isFullHeight={true} message={error} />}
           {!loading && !error && !document && (
-            <p style={{ color: "white" }}>Document not found.</p>
+            <ErrorMessage isFullHeight={true} message="Document not found." />
           )}
 
           {/* Document Preview */}
           {!loading && !error && document && (
-            <div
-              style={{
-                background: "white",
-                borderRadius: 5,
-                width: "100%",
-                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.08)",
-                display: "flex",
-                flexDirection: "row",
-                flex: 1,
-                minHeight: 0,
-                overflow: "hidden",
-              }}
-            >
+            <div className={styles.whiteContainer}>
               {/* Left panel */}
-              <div
-                style={{
-                  width: "55%",
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRight: "1px solid #2d2d2d",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    padding: "1rem",
-                    boxSizing: "border-box",
-                    height: "70px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      color: "#2d3748",
-                      fontSize: "1.25rem",
-                    }}
-                  >
-                    {document.filename}
-                  </span>
-                  <button
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      padding: 0,
-                    }}
-                    onClick={() => handleDeleteDocument(document.id)}
-                  >
+              <div className={styles.leftPanel}>
+                <div className={styles.leftPanelHeaderContainer}>
+                  <span>{document.filename}</span>
+                  <button onClick={() => handleDeleteDocument(document.id)}>
                     <DeleteIcon />
                   </button>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.9rem",
-                    padding: "1rem 1rem 1rem 1rem",
-                    boxSizing: "border-box",
-                    fontFamily: "monospace",
-                    fontSize: "0.8rem",
-                    borderTop: "1px solid #2d2d2d",
-                    height: "50px",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#4a5568",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
+                <div className={styles.leftPanelDateContainer}>
+                  <span>
                     <ScheduleIcon style={{ fontSize: "1.2rem" }} />{" "}
                     {formatDate(document.createdAt)}
                   </span>
@@ -309,44 +188,22 @@ export default function DocumentDetail() {
               </div>
 
               {/* Right panel */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "45%",
-                  minHeight: 0,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "1rem",
-                    borderBottom: "1px solid #2d2d2d",
-                    height: "71px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <h2 style={{ fontSize: "1.2rem", fontWeight: 600 }}>
-                    Analyses
-                  </h2>
+              <div className={styles.rightPanel}>
+                <div className={styles.rightPanelHeaderContainer}>
+                  <h2>Analyses</h2>
                   <button
                     onClick={() =>
                       navigate("/analyze", { state: { document } })
                     }
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      padding: "0.5rem",
-                    }}
                   >
                     <AddOutlinedIcon /> New Analysis
                   </button>
                 </div>
-                {analyses.length === 0 ? (
-                  <p style={{ padding: "1rem", margin: 0 }}>No analyses yet.</p>
+                {analyses.length !== 0 ? (
+                  <ErrorMessage
+                    isFullHeight={true}
+                    message="No analyses yet."
+                  />
                 ) : (
                   <>
                     <AnalysisTabs
