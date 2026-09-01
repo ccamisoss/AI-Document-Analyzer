@@ -199,7 +199,7 @@ export default function DocumentDetail() {
                     <AddOutlinedIcon /> New Analysis
                   </button>
                 </div>
-                {analyses.length !== 0 ? (
+                {analyses.length === 0 ? (
                   <ErrorMessage
                     isFullHeight={true}
                     message="No analyses yet."

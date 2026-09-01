@@ -45,7 +45,7 @@
   display: none;
 }
 
-.analysisTab {
+.analysisTab, .analysisTabActive {
   flex-shrink: 0;
   position: relative;
   padding: 0.85rem 0.25rem 0.75rem;
