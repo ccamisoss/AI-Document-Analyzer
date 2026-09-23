@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import authService from "../../services/auth.service";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../../hooks/useSession";
 import { formatDate, sortAnalysesOldestFirst } from "../../utils";
+import { deleteDocument, getDocument } from "../../services/documents.service";
+import { getAnalyses } from "../../services/analisis.service";
 import styles from "./index.module.css";
 
 import AnalysisResult from "../../components/AnalysisResult";
@@ -23,10 +23,8 @@ export default function DocumentDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { logout } = useSession();
   const params = new URLSearchParams(window.location.search);
   const documentId = params.get("id");
-  const token = useMemo(() => authService.getToken(), []);
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(null);
 
   const setAnalysis = (analysisId) => {
@@ -39,64 +37,21 @@ export default function DocumentDetail() {
     const load = async () => {
       setLoading(true);
       setError(null);
-
       try {
-        if (!token) {
-          console.log("No token found, redirecting to login...");
-          throw new Error("You are not authenticated");
-        }
-
         const [docsRes, analysesRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/documents`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_BASE_URL}/documents/${documentId}/analyses`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          getDocument(documentId),
+          getAnalyses(documentId),
         ]);
 
-        if (docsRes.status === 401 || analysesRes.status === 401) {
-          logout();
-          return;
+        if (!docsRes.success) {
+          throw new Error(docsRes.error || "Failed to load document");
+        }
+        if (!analysesRes.success) {
+          throw new Error(analysesRes.error || "Failed to load analyses");
         }
 
-        const docsJson = await docsRes.json();
-        if (!docsRes.ok) {
-          throw new Error(
-            docsJson.error || docsJson.message || "Failed to load document",
-          );
-        }
-
-        const found = (Array.isArray(docsJson.data) ? docsJson.data : []).find(
-          (d) => String(d.id) === String(documentId),
-        );
-        setDocument(found || null);
-
-        const analysesJson = await analysesRes.json();
-        if (!analysesRes.ok) {
-          throw new Error(
-            analysesJson.error ||
-              analysesJson.message ||
-              "Failed to load analyses",
-          );
-        }
-
-        const loadedAnalyses = Array.isArray(analysesJson.data)
-          ? analysesJson.data
-          : [];
-        setAnalyses(loadedAnalyses);
-        const analysisId = params.get("analysis");
-        if (analysisId) {
-          setAnalysis(analysisId);
-        }
-        if (loadedAnalyses.length > 0) {
-          setSelectedAnalysisId(sortAnalysesOldestFirst(loadedAnalyses)[0].id);
-          navigate(
-            `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(loadedAnalyses)[0].id}`,
-          );
-        }
+        setDocument(docsRes.data || null);
+        setAnalyses(analysesRes.data || []);
       } catch (e) {
         console.log("Error loading document details:", e);
         setError(e.message || "Failed to load document");
@@ -106,38 +61,35 @@ export default function DocumentDetail() {
     };
 
     if (documentId) load();
-  }, [documentId, token, logout]);
+  }, [documentId]);
+
+  useEffect(() => {
+    const analysisId = params.get("analysis");
+
+    if (analysisId) {
+      setAnalysis(analysisId);
+    }
+
+    if (analyses.length > 0) {
+      setSelectedAnalysisId(sortAnalysesOldestFirst(analyses)[0].id);
+      navigate(
+        `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(analyses)[0].id}`,
+      );
+    }
+  }, [analyses]);
 
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;
-
     try {
-      const tokenNow = authService.getToken();
-      if (!tokenNow) {
-        throw new Error("You are not authenticated");
+      const { success, error } = await deleteDocument(documentId);
+      if (!success) {
+        throw new Error(error || "Failed to delete document");
       }
-
-      const res = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${tokenNow}`,
-        },
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          logout();
-          return;
-        }
-        throw new Error(
-          data.error || data.message || "Failed to delete document",
-        );
-      }
-
       navigate("/");
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error deleting document:", e);
+      setError(e.message || "Failed to delete document");
+    }
   };
 
   return (
