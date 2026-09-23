@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import authService from "../../services/auth.service";
-import { useSession } from "../../hooks/useSession";
 import { formatDate } from "../../utils";
+import { getDocuments } from "../../services/documents.service";
 
 import styles from "./index.module.css";
 import Loader from "../../components/Loader";
@@ -12,46 +11,25 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { logout } = useSession();
 
   useEffect(() => {
     const loadDocuments = async () => {
       setLoading(true);
       setError(null);
-
+      
       try {
-        const token = authService.getToken();
-        if (!token) {
-          throw new Error("You are not authenticated");
+        const { success, data, error } = await getDocuments();
+
+        if (!success) {
+          throw new Error(error || "Failed to load documents");
         }
 
-        const res = await fetch(`${API_BASE_URL}/documents`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          if (res.status === 401) {
-            logout();
-            return;
-          }
-          throw new Error(
-            data.error || data.message || "Failed to load documents",
-          );
-        }
-
-        setDocuments(Array.isArray(data.data) ? data.data : []);
+        setDocuments(data || []);
       } catch (e) {
         setError(e.message || "Failed to load documents");
       } finally {
@@ -60,7 +38,7 @@ export default function Dashboard() {
     };
 
     loadDocuments();
-  }, [logout]);
+  }, []);
 
   const handleClickDocument = (documentId) => {
     navigate(`/documentDetail?id=${documentId}`);
