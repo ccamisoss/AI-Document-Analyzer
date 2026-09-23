@@ -157,9 +157,21 @@ const deleteDocument = async ({
   }
 };
 
+type GetDocumentInput = {
+  userId: string;
+  id: number;
+};
+
+const getDocument = async ({ userId, id }: GetDocumentInput) => {
+  return prisma.document.findUnique({
+    where: { id, userId },
+  });
+};
+
 export const documentsService = {
   getDocuments,
   deleteDocument,
+  getDocument,
 };
 
 export { validatePdf, extractTextFromPdf, getPdfFileData };
