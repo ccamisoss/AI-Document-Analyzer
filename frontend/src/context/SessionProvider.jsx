@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/auth.service";
+import { setOnUnauthorized } from "../services/api";
 import { SessionContext } from "./session-context";
 
 export function SessionProvider({ children }) {
@@ -33,6 +34,10 @@ export function SessionProvider({ children }) {
     setUser(null);
     navigate("/login", { replace: true });
   }, [navigate]);
+
+  useEffect(() => {
+    setOnUnauthorized(logout);
+  }, [logout]);
 
   const value = useMemo(
     () => ({
