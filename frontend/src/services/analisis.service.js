@@ -8,6 +8,11 @@ const getAnalyses = async (documentId) => {
     const response = await request(`/documents/${documentId}/analyses`, {
       headers,
     });
+
+    if (response.status !== "success") {
+      throw new Error(response.message);
+    }
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching analyses:", error);
@@ -22,6 +27,10 @@ const deleteAnalysis = async (analysisId) => {
       method: "DELETE",
     });
 
+    if (response.status !== "success") {
+      throw new Error(response.message);
+    }
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error deleting analysis:", error);
@@ -29,4 +38,23 @@ const deleteAnalysis = async (analysisId) => {
   }
 };
 
-export { getAnalyses, deleteAnalysis };
+const createAnalysis = async (analysis, url) => {
+  try {
+    const response = await request(url, {
+      headers,
+      method: "POST",
+      body: analysis,
+    });
+
+    if (response.status !== "success") {
+      throw new Error(response.message);
+    }
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error creating analysis:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export { getAnalyses, deleteAnalysis, createAnalysis };

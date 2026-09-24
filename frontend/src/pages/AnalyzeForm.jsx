@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import authService from "../services/auth.service";
-import { useSession } from "../hooks/useSession";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createAnalysis } from "../services/analisis.service";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const TEST_REDIRECT_DELAY_MS = 3_000;
 
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 function AnalyzeForm() {
-  const { logout } = useSession();
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,21 +60,12 @@ function AnalyzeForm() {
     setError(null);
 
     try {
-      const token = authService.getToken();
-      if (!token) {
-        throw new Error("You are not authenticated");
-      }
-
       let body = null;
-      let headers = {
-        Authorization: `Bearer ${token}`,
-      };
       let url = null;
 
       if (document) {
         body = JSON.stringify({ prompt: prompt.trim() });
-        headers["Content-Type"] = "application/json";
-        url = `${API_BASE_URL}/documents/${document.id}/analyses`;
+        url = `/documents/${document.id}/analyses`;
       } else {
         const formData = new FormData();
         formData.append("file", file);
@@ -85,33 +73,17 @@ function AnalyzeForm() {
           formData.append("prompt", prompt.trim());
         }
         body = formData;
-        url = `${API_BASE_URL}/analysis`;
+        url = `/analysis`;
       }
 
-      const fetchResponse = await fetch(url, {
-        method: "POST",
-        body: body,
-        headers: headers,
-      });
+      const { success, error, data } = await createAnalysis(body, url);
 
-      const data = await fetchResponse.json();
-
-      if (!fetchResponse.ok) {
-        if (fetchResponse.status === 401) {
-          logout();
-          throw new Error("Session expired. Please log in again.");
-        }
-        throw new Error(
-          data.error || data.message || "Error processing the document",
-        );
+      if (!success) {
+        throw new Error(error || "Error processing the document");
       }
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, TEST_REDIRECT_DELAY_MS),
-      );
 
       navigate(
-        `/documentDetail?id=${data.data.document.id}&analysis=${data.data.analysis.id}`,
+        `/documentDetail?id=${data.document.id}&analysis=${data.analysis.id}`,
       );
       setFile(null);
       setPrompt("");
