@@ -21,7 +21,6 @@ function handleUnauthorized() {
 export async function request(path, options = {}) {
   const token = authService.getToken();
 
-  console.log("token", token);
   if (!token) {
     handleUnauthorized();
   }
