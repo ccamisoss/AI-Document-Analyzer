@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { formatDate, sortAnalysesOldestFirst } from "../../utils";
-import authService from "../../services/auth.service";
+import { deleteAnalysis } from "../../services/analisis.service";
 import styles from "./index.module.css";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,28 +31,10 @@ export default function AnalysisResult({
     setDeletingAnalysisId(analysisId);
 
     try {
-      const tokenNow = authService.getToken();
-      if (!tokenNow) {
-        throw new Error("You are not authenticated");
-      }
+      const { success, error } = await deleteAnalysis(analysisId);
 
-      const res = await fetch(`${API_BASE_URL}/analysis/${analysisId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${tokenNow}`,
-        },
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          logout();
-          return;
-        }
-        throw new Error(
-          data.error || data.message || "Failed to delete analysis",
-        );
+      if (!success) {
+        throw new Error(error || "Failed to delete analysis");
       }
 
       setAnalyses((prev) => {

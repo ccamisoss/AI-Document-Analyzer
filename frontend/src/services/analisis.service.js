@@ -15,4 +15,18 @@ const getAnalyses = async (documentId) => {
   }
 };
 
-export { getAnalyses };
+const deleteAnalysis = async (analysisId) => {
+  try {
+    const response = await request(`/analysis/${analysisId}`, {
+      headers,
+      method: "DELETE",
+    });
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error deleting analysis:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export { getAnalyses, deleteAnalysis };
