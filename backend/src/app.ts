@@ -7,6 +7,7 @@ import cors from "cors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { env } from "./config/env.js";
+import { sendInternalError, sendResult, warning } from "./http/api-response.js";
 
 import authRouter from "./modules/auth/auth.routes.js";
 import analysisRouter from "./modules/analysis/analysis.routes.js";
@@ -40,12 +41,11 @@ export function createApp() {
   app.use("/documents", documentsRouter);
 
   app.use((_req, res) => {
-    res.status(404).json({ error: "Not Found" });
+    sendResult(res, warning("Not Found", 404));
   });
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    console.error("Unhandled error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    sendInternalError(res, "Unhandled error:", err);
   });
 
   return app;

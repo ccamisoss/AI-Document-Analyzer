@@ -1,6 +1,12 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { verifyToken } from "./jwt.js";
 import { prisma } from "../../db/client.js";
+import {
+  sendInternalError,
+  sendResult,
+  sendUnauthorized,
+  warning,
+} from "../../http/api-response.js";
 
 export async function authenticate(
   req: Request,
@@ -11,44 +17,36 @@ export async function authenticate(
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({
-        error: "Authorization header is required",
-      });
+      return sendResult(res, warning("Authorization header is required", 401));
     }
 
     const parts = authHeader.split(" ");
 
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-      return res.status(401).json({
-        error: "Invalid authorization format. Expected: Bearer <token>",
-      });
+      return sendResult(
+        res,
+        warning("Invalid authorization format. Expected: Bearer <token>", 401),
+      );
     }
 
     const token = parts[1];
 
     if (!token) {
-      return res.status(401).json({
-        error: "Token is required",
-      });
+      return sendResult(res, warning("Token is required", 401));
     }
 
     let decoded;
     try {
       decoded = verifyToken(token);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Invalid token") {
-          return res.status(401).json({
-            error: error.message,
-          });
-        }
-        if (error.message === "Token expired") {
-          return res.status(401).json({
-            error: error.message,
-          });
-        }
+      if (
+        error instanceof Error &&
+        error.message === "JWT_SECRET is not configured"
+      ) {
+        throw error;
       }
-      throw error;
+
+      return sendResult(res, warning("Invalid or expired token", 401));
     }
 
     const user = await prisma.user.findUnique({
@@ -60,18 +58,13 @@ export async function authenticate(
     });
 
     if (!user) {
-      return res.status(401).json({
-        error: "User not found",
-      });
+      return sendUnauthorized(res);
     }
 
     req.user = user;
 
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
-    res.status(500).json({
-      error: "Internal server error during authentication",
-    });
+    return sendInternalError(res, "Authentication error:", error);
   }
 }

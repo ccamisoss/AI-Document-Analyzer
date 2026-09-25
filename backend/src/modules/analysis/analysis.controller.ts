@@ -1,5 +1,13 @@
 import { type Request, type Response } from "express";
 import { analysisService } from "./analysis.service.js";
+import {
+  ok,
+  parseRouteId,
+  sendInternalError,
+  sendResult,
+  sendUnauthorized,
+  warning,
+} from "../../http/api-response.js";
 
 const {
   createAnalysisAndDocument,
@@ -12,97 +20,71 @@ const createAnalysis = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const file = req.file;
     const userPrompt = req.body.prompt;
-    const documentId = req.params?.id;
-    let result = null;
+    const documentIdParam = req.params?.id;
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
-    if (documentId) {
-      result = await createAnalysisService({
-        userId,
-        documentId: Number(documentId),
-        userPrompt,
-      });
-    } else {
-      if (!file) {
-        return res.status(400).json({
-          status: "warning",
-          message: "PDF document is required",
-        });
+    if (documentIdParam) {
+      const parsedDocumentId = parseRouteId(documentIdParam, "Document");
+      if ("error" in parsedDocumentId) {
+        return sendResult(res, parsedDocumentId.error);
       }
 
-      result = await createAnalysisAndDocument({
+      const result = await createAnalysisService({
         userId,
-        file,
+        documentId: parsedDocumentId.id,
         userPrompt,
       });
+
+      return sendResult(res, result);
     }
 
-    return res.status(200).json(result);
-  } catch (error) {
-    console.error("Create analysis error:", error);
+    if (!file) {
+      return sendResult(res, warning("PDF document is required"));
+    }
 
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
+    const result = await createAnalysisAndDocument({
+      userId,
+      file,
+      userPrompt,
     });
+
+    return sendResult(res, result);
+  } catch (error) {
+    return sendInternalError(res, "Create analysis error:", error);
   }
 };
 
 const deleteAnalysis = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const idParam = req.params.id;
-    const analysisId = Array.isArray(idParam) ? idParam[0] : idParam;
+    const parsedAnalysisId = parseRouteId(req.params.id, "Analysis");
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
-    if (!analysisId) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Analysis id is required",
-      });
-    }
-
-    const analysisIdNum = Number(analysisId);
-    if (!Number.isInteger(analysisIdNum) || analysisIdNum < 1) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Analysis id must be a positive integer",
-      });
+    if ("error" in parsedAnalysisId) {
+      return sendResult(res, parsedAnalysisId.error);
     }
 
     const { deletedCount } = await deleteAnalysisService({
       userId,
-      analysisId: analysisIdNum,
+      analysisId: parsedAnalysisId.id,
     });
 
     if (deletedCount === 0) {
-      return res.status(404).json({
-        status: "warning",
-        message: "Analysis not found",
-      });
+      return sendResult(res, warning("Analysis not found", 404));
     }
 
-    return res.status(200).json({
-      status: "success",
-      message: "Analysis deleted successfully",
-      data: { deletedCount },
-    });
+    return sendResult(
+      res,
+      ok({ deletedCount }, "Analysis deleted successfully"),
+    );
   } catch (error) {
-    console.error("Delete analysis error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    return sendInternalError(res, "Delete analysis error:", error);
   }
 };
 

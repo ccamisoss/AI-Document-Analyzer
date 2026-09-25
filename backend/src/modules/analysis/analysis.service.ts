@@ -8,6 +8,7 @@ import { generateCompletion } from "../ai/llm.provider.js";
 import { prisma } from "../../db/client.js";
 import crypto from "crypto";
 import { unlink } from "node:fs/promises";
+import { fail, ok, warning, type ApiResult } from "../../http/api-response.js";
 
 const generateDocumentHash = (buffer: Buffer) => {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -38,14 +39,11 @@ const createAnalysisAndDocument = async ({
   userId,
   file,
   userPrompt,
-}: CreateAnalysisAndDocumentInput) => {
+}: CreateAnalysisAndDocumentInput): Promise<ApiResult> => {
   const validation = validatePdf(file);
 
   if (!validation.valid) {
-    return {
-      status: "warning",
-      message: validation.message,
-    };
+    return warning(validation.message ?? "Invalid PDF document");
   }
 
   let documentText: string;
@@ -55,10 +53,7 @@ const createAnalysisAndDocument = async ({
   } catch (error) {
     await cleanupUploadedFile(file);
     console.error("PDF extraction error:", error);
-    return {
-      status: "error",
-      message: "Failed to extract text from the PDF document",
-    };
+    return fail("Failed to extract text from the PDF document");
   }
 
   const cleanedText = documentText
@@ -67,10 +62,7 @@ const createAnalysisAndDocument = async ({
 
   if (!cleanedText) {
     await cleanupUploadedFile(file);
-    return {
-      status: "warning",
-      message: "The document contains no readable text",
-    };
+    return warning("The document contains no readable text");
   }
 
   const fileData = await getPdfFileData(file);
@@ -116,10 +108,7 @@ const createAnalysisAndDocument = async ({
     });
   } catch (error) {
     console.error("LLM call error:", error);
-    return {
-      status: "error",
-      message: "AI service failed to generate a response",
-    };
+    return fail("AI service failed to generate a response", 502);
   }
 
   let aiResult: any;
@@ -127,10 +116,7 @@ const createAnalysisAndDocument = async ({
   try {
     aiResult = JSON.parse(rawResponse);
   } catch {
-    return {
-      status: "error",
-      message: "AI returned malformed JSON",
-    };
+    return fail("AI returned malformed JSON", 502);
   }
 
   if (
@@ -138,10 +124,7 @@ const createAnalysisAndDocument = async ({
     !Array.isArray(aiResult.keyPoints) ||
     !Array.isArray(aiResult.insights)
   ) {
-    return {
-      status: "error",
-      message: "Invalid AI response structure",
-    };
+    return fail("Invalid AI response structure", 502);
   }
 
   const analysis = await prisma.analysis.create({
@@ -153,13 +136,10 @@ const createAnalysisAndDocument = async ({
     },
   });
 
-  return {
-    status: "success",
-    data: {
-      analysis: analysis,
-      document: document,
-    },
-  };
+  return ok({
+    analysis,
+    document,
+  });
 };
 
 type GetAnalysesByDocumentIdInput = {
@@ -226,7 +206,7 @@ const createAnalysis = async ({
   userId,
   documentId,
   userPrompt,
-}: CreateAnalysisInput) => {
+}: CreateAnalysisInput): Promise<ApiResult> => {
 
   let document = await prisma.document.findFirst({
     where: {
@@ -236,10 +216,7 @@ const createAnalysis = async ({
   });
 
   if (!document) {
-    return {
-      status: "error",
-      message: "Document not found",
-    };
+    return warning("Document not found", 404);
   }
 
   const promptResult = buildPrompt(
@@ -263,10 +240,7 @@ const createAnalysis = async ({
     });
   } catch (error) {
     console.error("LLM call error:", error);
-    return {
-      status: "error",
-      message: "AI service failed to generate a response",
-    };
+    return fail("AI service failed to generate a response", 502);
   }
 
   let aiResult: any;
@@ -274,10 +248,7 @@ const createAnalysis = async ({
   try {
     aiResult = JSON.parse(rawResponse);
   } catch {
-    return {
-      status: "error",
-      message: "AI returned malformed JSON",
-    };
+    return fail("AI returned malformed JSON", 502);
   }
 
   if (
@@ -285,10 +256,7 @@ const createAnalysis = async ({
     !Array.isArray(aiResult.keyPoints) ||
     !Array.isArray(aiResult.insights)
   ) {
-    return {
-      status: "error",
-      message: "Invalid AI response structure",
-    };
+    return fail("Invalid AI response structure", 502);
   }
 
   const analysis = await prisma.analysis.create({
@@ -300,13 +268,10 @@ const createAnalysis = async ({
     },
   });
 
-  return {
-    status: "success",
-    data: {
-      analysis: analysis,
-      document,
-    },
-  };
+  return ok({
+    analysis,
+    document,
+  });
 };
 
 export const analysisService = {

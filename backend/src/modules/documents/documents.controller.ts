@@ -1,6 +1,14 @@
 import { type Request, type Response } from "express";
 import { documentsService } from "./documents.service.js";
 import { analysisService } from "../analysis/analysis.service.js";
+import {
+  ok,
+  parseRouteId,
+  sendInternalError,
+  sendResult,
+  sendUnauthorized,
+  warning,
+} from "../../http/api-response.js";
 
 const {
   getDocuments: getDocumentsService,
@@ -15,183 +23,100 @@ const getDocuments = async (req: Request, res: Response) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
     const documents = await getDocumentsService({ userId });
-
-    return res.status(200).json({
-      status: "success",
-      data: documents,
-    });
+    return sendResult(res, ok(documents));
   } catch (error) {
-    console.error("Get documents error:", error);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    return sendInternalError(res, "Get documents error:", error);
   }
 };
 
 const deleteDocument = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const idParam = req.params.id;
-    const id = Array.isArray(idParam) ? idParam[0] : idParam;
+    const parsedDocumentId = parseRouteId(req.params.id, "Document");
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
-    if (!id) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id is required",
-      });
-    }
-
-    const documentIdNum = Number(id);
-    if (!Number.isInteger(documentIdNum) || documentIdNum < 1) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id must be a positive integer",
-      });
+    if ("error" in parsedDocumentId) {
+      return sendResult(res, parsedDocumentId.error);
     }
 
     const { success } = await deleteDocumentService({
       userId,
-      id: documentIdNum,
+      id: parsedDocumentId.id,
     });
 
     if (!success) {
-      return res.status(404).json({
-        status: "warning",
-        message: "Document not found",
-      });
+      return sendResult(res, warning("Document not found", 404));
     }
 
-    return res.status(200).json({
+    return sendResult(res, {
       status: "success",
       message: "Document deleted successfully",
     });
   } catch (error) {
-    console.error("Delete document error:", error);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    return sendInternalError(res, "Delete document error:", error);
   }
 };
 
 const getAnalysesByDocumentId = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const idParam = req.params.id;
-    const documentId = Array.isArray(idParam) ? idParam[0] : idParam;
+    const parsedDocumentId = parseRouteId(req.params.id, "Document");
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
-    if (!documentId) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id is required",
-      });
-    }
-
-    const documentIdNum = Number(documentId);
-    if (!Number.isInteger(documentIdNum) || documentIdNum < 1) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id must be a positive integer",
-      });
+    if ("error" in parsedDocumentId) {
+      return sendResult(res, parsedDocumentId.error);
     }
 
     const analyses = await getAnalysesByDocumentIdService({
       userId,
-      documentId: documentIdNum,
+      documentId: parsedDocumentId.id,
     });
 
     if (!analyses) {
-      return res.status(404).json({
-        status: "warning",
-        message: "Document not found",
-      });
+      return sendResult(res, warning("Document not found", 404));
     }
 
-    return res.status(200).json({
-      status: "success",
-      data: analyses,
-    });
+    return sendResult(res, ok(analyses));
   } catch (error) {
-    console.error("Get analyses error:", error);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    return sendInternalError(res, "Get analyses error:", error);
   }
 };
 
 const getDocument = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const idParam = req.params.id;
-    const documentId = Array.isArray(idParam) ? idParam[0] : idParam;
+    const parsedDocumentId = parseRouteId(req.params.id, "Document");
 
     if (!userId) {
-      return res.status(401).json({
-        error: "Unauthorized",
-      });
+      return sendUnauthorized(res);
     }
 
-    if (!documentId) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id is required",
-      });
-    }
-
-    const documentIdNum = Number(documentId);
-    if (!Number.isInteger(documentIdNum) || documentIdNum < 1) {
-      return res.status(400).json({
-        status: "warning",
-        message: "Document id must be a positive integer",
-      });
+    if ("error" in parsedDocumentId) {
+      return sendResult(res, parsedDocumentId.error);
     }
 
     const document = await getDocumentService({
       userId,
-      id: documentIdNum,
+      id: parsedDocumentId.id,
     });
 
     if (!document) {
-      return res.status(404).json({
-        status: "warning",
-        message: "Document not found",
-      });
+      return sendResult(res, warning("Document not found", 404));
     }
 
-    return res.status(200).json({
-      status: "success",
-      data: document,
-    });
+    return sendResult(res, ok(document));
   } catch (error) {
-    console.error("Get document by id error:", error);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    return sendInternalError(res, "Get document by id error:", error);
   }
 };
 

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../db/client.js";
-import { signToken, verifyToken } from "./jwt.js";
+import { signToken } from "./jwt.js";
+import { fail, ok, warning, type ApiResult } from "../../http/api-response.js";
 
 export interface RegisterInput {
   email: string;
@@ -20,67 +21,81 @@ export interface AuthResult {
   token: string;
 }
 
-export async function registerUser(input: RegisterInput): Promise<AuthResult> {
-  const existingUser = await prisma.user.findUnique({
-    where: { email: input.email },
-  });
+export async function registerUser(
+  input: RegisterInput,
+): Promise<ApiResult<AuthResult>> {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: input.email },
+    });
 
-  if (existingUser) {
-    throw new Error("Email already registered");
+    if (existingUser) {
+      return warning("Email already registered", 409);
+    }
+
+    if (input.password.length < 8) {
+      return warning("Password must be at least 8 characters");
+    }
+
+    const hashedPassword = await bcrypt.hash(input.password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email: input.email,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+
+    const token = signToken(user.id);
+
+    return ok({
+      user,
+      token,
+    });
+  } catch (error) {
+    console.error("Register user error:", error);
+    return fail("Internal server error");
   }
-
-  if (input.password.length < 8) {
-    throw new Error("Password must be at least 8 characters");
-  }
-
-  const hashedPassword = await bcrypt.hash(input.password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email: input.email,
-      password: hashedPassword,
-    },
-    select: {
-      id: true,
-      email: true,
-    },
-  });
-
-  const token = signToken(user.id);
-
-  return {
-    user,
-    token,
-  };
 }
 
-export async function loginUser(input: LoginInput): Promise<AuthResult> {
-  const user = await prisma.user.findUnique({
-    where: { email: input.email },
-    select: {
-      id: true,
-      email: true,
-      password: true,
-    },
-  });
+export async function loginUser(
+  input: LoginInput,
+): Promise<ApiResult<AuthResult>> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: input.email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
 
-  if (!user) {
-    throw new Error("This email is not registered");
+    if (!user) {
+      return warning("Invalid email or password", 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(input.password, user.password);
+
+    if (!isPasswordValid) {
+      return warning("Invalid email or password", 401);
+    }
+
+    const token = signToken(user.id);
+
+    return ok({
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Login user error:", error);
+    return fail("Internal server error");
   }
-
-  const isPasswordValid = await bcrypt.compare(input.password, user.password);
-
-  if (!isPasswordValid) {
-    throw new Error("The password is incorrect");
-  }
-
-  const token = signToken(user.id);
-
-  return {
-    user: {
-      id: user.id,
-      email: user.email,
-    },
-    token,
-  };
 }

@@ -129,32 +129,33 @@ const deleteDocument = async ({
   userId,
   id,
 }: DeleteDocumentInput): Promise<{ success: boolean }> => {
-  try {
-    const document = await prisma.document.findUnique({
-      where: { id, userId },
-    });
+  const document = await prisma.document.findUnique({
+    where: { id, userId },
+  });
 
-    if (!document) {
-      throw new Error("Document not found");
-    }
-
-    if (document.path) {
-      await unlink(document.path);
-    }
-
-    await prisma.analysis.deleteMany({
-      where: { documentId: id },
-    });
-
-    await prisma.document.delete({
-      where: { id, userId },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("Delete document error:", error);
-    throw new Error("Failed to delete document");
+  if (!document) {
+    return { success: false };
   }
+
+  if (document.path) {
+    try {
+      await unlink(document.path);
+    } catch (error: any) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+
+  await prisma.analysis.deleteMany({
+    where: { documentId: id },
+  });
+
+  await prisma.document.delete({
+    where: { id, userId },
+  });
+
+  return { success: true };
 };
 
 type GetDocumentInput = {
