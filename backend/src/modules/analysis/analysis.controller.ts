@@ -19,7 +19,7 @@ const createAnalysis = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const file = req.file;
-    const userPrompt = req.body.prompt;
+    const userPrompt = req.body?.prompt;
     const documentIdParam = req.params?.id;
 
     if (!userId) {
