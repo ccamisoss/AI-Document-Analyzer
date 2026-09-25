@@ -13,7 +13,7 @@ class AuthService {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Error registering user');
+      throw new Error(data.message || data.error || 'Error registering user');
     }
 
     return data.data;
@@ -31,7 +31,7 @@ class AuthService {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Error signing in');
+      throw new Error(data.message || data.error || 'Error signing in');
     }
 
     return data.data;
