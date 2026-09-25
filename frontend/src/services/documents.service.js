@@ -6,6 +6,7 @@ let headers = {
 const getDocuments = async () => {
   try {
     const response = await request("/documents", { headers });
+    
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching documents:", error);
@@ -16,6 +17,7 @@ const getDocuments = async () => {
 const getDocument = async (id) => {
   try {
     const response = await request(`/documents/${id}`, { headers });
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching document by id:", error);
@@ -29,6 +31,7 @@ const deleteDocument = async (id) => {
       headers,
       method: "DELETE",
     });
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error deleting document:", error);

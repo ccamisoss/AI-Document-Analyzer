@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatDate, sortAnalysesOldestFirst } from "../../utils";
+import { formatDate, sortAnalysesOldestFirst, showAlert } from "../../utils";
 import { deleteDocument, getDocument } from "../../services/documents.service";
 import { getAnalyses } from "../../services/analisis.service";
 import styles from "./index.module.css";
@@ -88,7 +88,7 @@ export default function DocumentDetail() {
       navigate("/");
     } catch (e) {
       console.error("Error deleting document:", e);
-      setError(e.message || "Failed to delete document");
+      showAlert("Error deleting document", e.message, "error");
     }
   };
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createAnalysis } from "../services/analisis.service";
+import { showAlert } from "../utils";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
@@ -9,7 +10,6 @@ function AnalyzeForm() {
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const state = useLocation().state;
   const [document, setDocument] = useState(state?.document || null);
   const navigate = useNavigate();
@@ -37,13 +37,12 @@ function AnalyzeForm() {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
-        setError("Please select a PDF file");
+        showAlert("Error processing the document", "Please select a PDF file", "error");
         setFile(null);
         return;
       }
       setFile(selectedFile);
       setDocument(null);
-      setError(null);
       setPrompt("");
     }
   };
@@ -52,12 +51,11 @@ function AnalyzeForm() {
     e.preventDefault();
 
     if (!file && !document) {
-      setError("Please select a PDF file");
+      showAlert("Error processing the document", "Please select a PDF file", "error");
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       let body = null;
@@ -89,7 +87,7 @@ function AnalyzeForm() {
       setPrompt("");
       e.target.reset();
     } catch (err) {
-      setError(err.message || "Error sending the document");
+      showAlert("Error processing the document", err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -227,8 +225,6 @@ function AnalyzeForm() {
             </button>
           </div>
         </form>
-
-        {error && <div className="error-message">{error}</div>}
       </div>
     </div>
   );

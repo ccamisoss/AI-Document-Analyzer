@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatDate, sortAnalysesOldestFirst } from "../../utils";
+import { formatDate, sortAnalysesOldestFirst, showAlert } from "../../utils";
 import { deleteAnalysis } from "../../services/analisis.service";
 import styles from "./index.module.css";
 
@@ -21,13 +21,11 @@ export default function AnalysisResult({
   const userPrompt = analysis?.userPrompt;
   const createdAt = analysis?.createdAt;
   const [showUserPrompt, setShowUserPrompt] = useState(false);
-  const [deleteError, setDeleteError] = useState(null);
   const [deletingAnalysisId, setDeletingAnalysisId] = useState(null);
 
   const handleDeleteAnalysis = async (analysisId) => {
     if (!analysisId) return;
 
-    setDeleteError(null);
     setDeletingAnalysisId(analysisId);
 
     try {
@@ -46,7 +44,7 @@ export default function AnalysisResult({
         return next;
       });
     } catch (e) {
-      setDeleteError(e.message || "Failed to delete analysis");
+      showAlert("Error deleting analysis", e.message, "error");
     } finally {
       setDeletingAnalysisId(null);
     }
