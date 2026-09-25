@@ -9,10 +9,6 @@ const getAnalyses = async (documentId) => {
       headers,
     });
 
-    if (response.status !== "success") {
-      throw new Error(response.message);
-    }
-
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching analyses:", error);
@@ -26,10 +22,6 @@ const deleteAnalysis = async (analysisId) => {
       headers,
       method: "DELETE",
     });
-
-    if (response.status !== "success") {
-      throw new Error(response.message);
-    }
 
     return { success: true, data: response.data };
   } catch (error) {
@@ -45,10 +37,6 @@ const createAnalysis = async (analysis, url) => {
       method: "POST",
       body: analysis,
     });
-
-    if (response.status !== "success") {
-      throw new Error(response.message);
-    }
 
     return { success: true, data: response.data };
   } catch (error) {
