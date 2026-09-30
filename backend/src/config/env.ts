@@ -14,6 +14,8 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET,
   mockLlm: process.env.MOCK_LLM,
   huggingfaceApiKey: process.env.HF_TOKEN,
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
 } as const;
 
 export function validateEnv() {
@@ -29,6 +31,14 @@ export function validateEnv() {
 
   if (env.mockLlm !== "true" && !env.openaiApiKey) {
     missing.push("OPENAI_API_KEY (required when MOCK_LLM is not 'true')");
+  }
+
+  if (!env.supabaseUrl) {
+    missing.push("SUPABASE_URL");
+  }
+
+  if (!env.supabaseSecretKey) {
+    missing.push("SUPABASE_SECRET_KEY");
   }
 
   if (missing.length > 0) {
