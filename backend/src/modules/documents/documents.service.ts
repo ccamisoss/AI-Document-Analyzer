@@ -6,7 +6,8 @@ import {
   DOMRect,
 } from "@napi-rs/canvas";
 import { prisma } from "../../db/client.js";
-import { readFile, unlink } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { deleteFile, getFileUrl } from "../../db/supabase.js";
 
 // `pdf-parse` uses `pdfjs-dist` under the hood. `pdfjs-dist` expects browser globals
 // like `DOMMatrix` to exist. In Node, we provide them from `@napi-rs/canvas` before
@@ -139,11 +140,9 @@ const deleteDocument = async ({
 
   if (document.path) {
     try {
-      await unlink(document.path);
-    } catch (error: any) {
-      if (error?.code !== "ENOENT") {
-        throw error;
-      }
+      await deleteFile(document.path);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -164,9 +163,23 @@ type GetDocumentInput = {
 };
 
 const getDocument = async ({ userId, id }: GetDocumentInput) => {
-  return prisma.document.findUnique({
+  let document = await prisma.document.findUnique({
     where: { id, userId },
   });
+
+  if (!document) {
+    return null;
+  }
+
+  let url: string;
+
+  try {
+    url = await getFileUrl(document.path || "");
+  } catch {
+    return null;
+  }
+
+  return { ...document, url };
 };
 
 export const documentsService = {

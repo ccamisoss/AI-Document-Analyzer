@@ -7,8 +7,8 @@ import { buildPrompt } from "../ai/prompt.builder.js";
 import { generateCompletion } from "../ai/llm.provider.js";
 import { prisma } from "../../db/client.js";
 import crypto from "crypto";
-import { unlink } from "node:fs/promises";
 import { fail, ok, warning, type ApiResult } from "../../http/api-response.js";
+import { deleteFile, uploadFile } from "../../db/supabase.js";
 
 const generateDocumentHash = (buffer: Buffer) => {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -27,11 +27,9 @@ const cleanupUploadedFile = async (file: Express.Multer.File) => {
   }
 
   try {
-    await unlink(file.path);
-  } catch (error: any) {
-    if (error?.code !== "ENOENT") {
-      console.warn("Failed to remove uploaded file:", error);
-    }
+    await deleteFile(file.path);
+  } catch (error) {
+    console.warn("Failed to remove uploaded file:", error);
   }
 };
 
@@ -76,13 +74,21 @@ const createAnalysisAndDocument = async ({
   });
 
   if (!document) {
+    let path: string;
+
+    try {
+      path = await uploadFile(file.originalname.toString(), file);
+    } catch {
+      return fail("Failed to upload file");
+    }
+
     document = await prisma.document.create({
       data: {
         userId,
         content: documentText,
         hash: fileHash,
         filename: file.originalname,
-        path: file.path,
+        path,
       },
     });
   } else {
