@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createAnalysis } from "../services/analisis.service";
 import { showAlert } from "../utils";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
@@ -16,8 +15,8 @@ function AnalyzeForm() {
 
   // Memoize so createObjectURL isn't called on every prompt keystroke.
   const previewSrc = useMemo(() => {
-    if (document?.path) {
-      return `${API_BASE_URL}/${document.path.replace("\\", "/")}`;
+    if (document?.url) {
+      return document.url;
     }
     if (file) {
       return URL.createObjectURL(file);
@@ -37,7 +36,11 @@ function AnalyzeForm() {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
-        showAlert("Error processing the document", "Please select a PDF file", "error");
+        showAlert(
+          "Error processing the document",
+          "Please select a PDF file",
+          "error",
+        );
         setFile(null);
         return;
       }
@@ -51,7 +54,11 @@ function AnalyzeForm() {
     e.preventDefault();
 
     if (!file && !document) {
-      showAlert("Error processing the document", "Please select a PDF file", "error");
+      showAlert(
+        "Error processing the document",
+        "Please select a PDF file",
+        "error",
+      );
       return;
     }
 

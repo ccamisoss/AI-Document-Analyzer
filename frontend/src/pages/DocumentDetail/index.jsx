@@ -15,7 +15,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function DocumentDetail() {
   const [document, setDocument] = useState(null);
@@ -129,7 +128,7 @@ export default function DocumentDetail() {
                   </span>
                 </div>
                 <iframe
-                  src={`${API_BASE_URL}/${document.path.replace("\\", "/")}`}
+                  src={document.url}
                   style={{
                     flex: 1,
                     border: "none",
