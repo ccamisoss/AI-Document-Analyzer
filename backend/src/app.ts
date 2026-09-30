@@ -4,8 +4,6 @@ import express, {
   type Response,
 } from "express";
 import cors from "cors";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { env } from "./config/env.js";
 import { sendInternalError, sendResult, warning } from "./http/api-response.js";
 
@@ -13,9 +11,6 @@ import authRouter from "./modules/auth/auth.routes.js";
 import analysisRouter from "./modules/analysis/analysis.routes.js";
 import documentsRouter from "./modules/documents/documents.routes.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsDir = path.resolve(__dirname, "../uploads");
 
 export function createApp() {
   const app = express();
@@ -33,8 +28,6 @@ export function createApp() {
   app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
   });
-
-  app.use("/uploads", express.static(uploadsDir));
 
   app.use("/auth", authRouter);
   app.use("/analysis", analysisRouter);
