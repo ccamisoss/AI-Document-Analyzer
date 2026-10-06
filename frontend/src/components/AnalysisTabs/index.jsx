@@ -27,10 +27,6 @@ export default function AnalysisTabs({
         type="button"
         className={styles.analysisTabsArrow}
         onClick={() => scrollTabs(-1)}
-        disabled={
-          selectedAnalysisId == sortedAnalyses[0].id ||
-          sortedAnalyses.length === 1
-        }
         aria-label="Scroll tabs left"
       >
         <ChevronLeftOutlinedIcon fontSize="small" />
@@ -58,10 +54,6 @@ export default function AnalysisTabs({
         type="button"
         className={styles.analysisTabsArrow}
         onClick={() => scrollTabs(1)}
-        disabled={
-          selectedAnalysisId == sortedAnalyses[sortedAnalyses.length - 1].id ||
-          sortedAnalyses.length === 1
-        }
         aria-label="Scroll tabs right"
       >
         <ChevronRightOutlinedIcon fontSize="small" />
