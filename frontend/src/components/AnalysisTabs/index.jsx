@@ -28,7 +28,7 @@ export default function AnalysisTabs({
         className={styles.analysisTabsArrow}
         onClick={() => scrollTabs(-1)}
         disabled={
-          selectedAnalysisId === sortedAnalyses[0].id ||
+          selectedAnalysisId == sortedAnalyses[0].id ||
           sortedAnalyses.length === 1
         }
         aria-label="Scroll tabs left"
@@ -37,7 +37,7 @@ export default function AnalysisTabs({
       </button>
       <div className={styles.analysisTabsScroll} ref={scrollRef}>
         {sortedAnalyses.map((analysis, idx) => {
-          const isActive = selectedAnalysisId === analysis.id;
+          const isActive = selectedAnalysisId == analysis.id;
           const label = `Analysis ${analysis.id}`;
 
           return (
@@ -59,7 +59,7 @@ export default function AnalysisTabs({
         className={styles.analysisTabsArrow}
         onClick={() => scrollTabs(1)}
         disabled={
-          selectedAnalysisId === sortedAnalyses[sortedAnalyses.length - 1].id ||
+          selectedAnalysisId == sortedAnalyses[sortedAnalyses.length - 1].id ||
           sortedAnalyses.length === 1
         }
         aria-label="Scroll tabs right"

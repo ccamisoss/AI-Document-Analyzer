@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDate, sortAnalysesOldestFirst, showAlert } from "../../utils";
 import { deleteDocument, getDocument } from "../../services/documents.service";
@@ -24,6 +24,7 @@ export default function DocumentDetail() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const documentId = params.get("id");
+  const analysisId = params.get("analysis");
   const [selectedAnalysisId, setSelectedAnalysisId] = useState(null);
 
   const setAnalysis = (analysisId) => {
@@ -31,6 +32,11 @@ export default function DocumentDetail() {
     // change ulr id
     navigate(`/documentDetail?id=${documentId}&analysis=${analysisId}`);
   };
+
+  const selectedAnalysis = useMemo(
+    () => analyses.find((analysis) => analysis.id == selectedAnalysisId),
+    [analyses, selectedAnalysisId],
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -63,19 +69,22 @@ export default function DocumentDetail() {
   }, [documentId]);
 
   useEffect(() => {
-    const analysisId = params.get("analysis");
-
-    if (analysisId) {
-      setAnalysis(analysisId);
+    if (analyses.length === 0) {
+      navigate(`/documentDetail?id=${documentId}`);
+    } else {
+      const oldestAnalysis = sortAnalysesOldestFirst(analyses)[0];
+      if (analysisId) {
+        const foundAnalysis = analyses.find(
+          (analysis) => analysis.id == analysisId,
+        );
+        if (foundAnalysis) {
+          setAnalysis(foundAnalysis.id);
+          return;
+        }
+      }
+      setAnalysis(oldestAnalysis.id);
     }
-
-    if (analyses.length > 0) {
-      setSelectedAnalysisId(sortAnalysesOldestFirst(analyses)[0].id);
-      navigate(
-        `/documentDetail?id=${documentId}&analysis=${sortAnalysesOldestFirst(analyses)[0].id}`,
-      );
-    }
-  }, [analyses]);
+  }, [analyses, analysisId, documentId]);
 
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;
@@ -164,9 +173,7 @@ export default function DocumentDetail() {
                     />
                     {selectedAnalysisId && (
                       <AnalysisResult
-                        analysis={analyses.find(
-                          (analysis) => analysis.id === selectedAnalysisId,
-                        )}
+                        analysis={selectedAnalysis}
                         sortAnalysesOldestFirst={sortAnalysesOldestFirst}
                         setAnalyses={setAnalyses}
                         setSelectedAnalysisId={setSelectedAnalysisId}
