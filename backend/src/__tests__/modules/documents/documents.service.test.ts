@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client/wasm";
-import { prisma } from "../../db/client.ts";
-import { documentsService } from "../../modules/documents/documents.service.ts";
+import { prisma } from "../../../db/client.ts";
+import { documentsService } from "../../../modules/documents/documents.service.ts";
 const { getDocuments, deleteDocument } = documentsService;
 
 let user: Prisma.UserCreateInput = {

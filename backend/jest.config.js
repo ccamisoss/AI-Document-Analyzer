@@ -21,5 +21,8 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   setupFiles: ["<rootDir>/src/__tests__/setup.ts"],
-  testPathIgnorePatterns: ["<rootDir>/src/__tests__/setup.ts"],
+  testPathIgnorePatterns: [
+    "<rootDir>/src/__tests__/setup.ts",
+    "<rootDir>/src/__tests__/fixtures",
+  ],
 };
