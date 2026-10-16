@@ -20,6 +20,17 @@ type CreateAnalysisAndDocumentInput = {
   userPrompt?: string;
 };
 
+type AnalysisWithDocument = {
+  analysis: {
+    id: number;
+    userPrompt: string | null;
+    result: unknown;
+  };
+  document: {
+    id: number;
+  };
+};
+
 const cleanupUploadedFile = async (file: Express.Multer.File) => {
   // For diskStorage uploads, remove temporary files we don't need to keep.
   if (!file.path || file.buffer?.length) {
@@ -37,7 +48,8 @@ const createAnalysisAndDocument = async ({
   userId,
   file,
   userPrompt,
-}: CreateAnalysisAndDocumentInput): Promise<ApiResult> => {
+}: CreateAnalysisAndDocumentInput): Promise<ApiResult<AnalysisWithDocument>> => {
+
   const validation = validatePdf(file);
 
   if (!validation.valid) {
