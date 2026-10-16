@@ -9,7 +9,7 @@ let user: Prisma.UserCreateInput = {
   password: "test",
 };
 
-let document: Prisma.DocumentCreateInput & { id: number } = {
+let document: Prisma.DocumentUncheckedCreateInput & { id: number } = {
   id: 0,
   filename: "Test Document",
   path: "https://test.com/document.pdf",
@@ -33,9 +33,12 @@ beforeAll(async () => {
 describe("Documents Service - Get Documents", () => {
   it("should return document data when a valid user id is provided", async () => {
     const data = await getDocuments({ userId: user.id! });
+    const first = data[0];
     expect(data.length).toBeGreaterThan(0);
-    expect(data[0].filename).toBe(document.filename);
-    expect(data[0].path).toBe(document.path);
+    expect(first).toMatchObject({
+      filename: document.filename,
+      path: document.path,
+    });
   });
 
   it("should return empty array when invalid ID is provided", async () => {
@@ -63,6 +66,6 @@ describe("Documents Service - Delete Document", () => {
 });
 
 afterAll(async () => {
-  await prisma.user.deleteMany();
+  await prisma.user.deleteMany({ where: { id: user.id! } });
   await prisma.document.deleteMany();
 });
