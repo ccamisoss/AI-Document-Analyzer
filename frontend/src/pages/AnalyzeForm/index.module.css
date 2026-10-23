@@ -1,0 +1,72 @@
+.container {
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.title {
+  padding: 1.25rem 0 0.75rem;
+  background-color: white;
+  padding-left: 1rem;
+  border-bottom: 1px solid black;
+}
+
+.subcontainer {
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.previewContainer {
+  flex: 1;
+  display: flex;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.iframe {
+  flex: 1;
+  border-radius: 5;
+  border: none;
+}
+
+.placeholderContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  border: 2px solid #e2e8f0;
+  gap: 0.7rem;
+}
+
+.placeholderTitle {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.placeholderDescription {
+  font-size: 0.8rem;
+  width: 60%;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .placeholderTitle {
+    width: 60%;
+  }
+
+  .placeholderDescription {
+    font-size: 0.7rem;
+  }
+
+  .subcontainer {
+    padding: 0 1.2rem;
+  }
+}

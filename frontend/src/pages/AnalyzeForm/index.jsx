@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createAnalysis } from "../services/analisis.service";
-import { showAlert } from "../utils";
+import { createAnalysis } from "../../services/analisis.service";
+import { showAlert } from "../../utils";
+import styles from "./index.module.css";
 
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
@@ -106,65 +107,30 @@ function AnalyzeForm() {
 
   return (
     <div
-      style={{
-        height: "100%",
-        overflow: "auto",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1.5rem",
-      }}
+      className={styles.container}
     >
       <h1
-        style={{
-          padding: "1.25rem 0 0.75rem",
-          backgroundColor: "white",
-          paddingLeft: "1rem",
-          borderBottom: "1px solid black",
-        }}
+        className={styles.title}
       >
         Document Analyzer
       </h1>
       <div
-        style={{
-          padding: "0 1.5rem",
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-        }}
+        className={styles.subcontainer}
       >
         <form onSubmit={handleSubmit} className="upload-form">
           <div
-            style={{
-              flex: 1,
-              display: "flex",
-              padding: "1rem",
-              boxSizing: "border-box",
-            }}
+            className={styles.previewContainer}
           >
             {previewSrc ? (
               <iframe
                 src={previewSrc}
                 width="100%"
-                style={{
-                  flex: 1,
-                  borderRadius: 5,
-                  border: "none",
-                }}
+                className={styles.iframe}
                 title="PDF Preview"
               />
             ) : (
               <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 5,
-                  border: "2px solid #e2e8f0",
-                  gap: "0.7rem",
-                }}
+                className={styles.placeholderContainer}
               >
                 <DescriptionOutlinedIcon
                   style={{
@@ -173,14 +139,9 @@ function AnalyzeForm() {
                     padding: "1rem",
                   }}
                 />
-                <span style={{ fontSize: "1.5rem" }}>No document selected</span>
+                <span className={styles.placeholderTitle}>No document selected</span>
                 <p
-                  style={{
-                    fontSize: "0.8rem",
-                    width: "60%",
-                    textAlign: "center",
-                    margin: 0,
-                  }}
+                  className={styles.placeholderDescription}
                 >
                   Select a PDF to preview your document before analyzing it.
                 </p>
