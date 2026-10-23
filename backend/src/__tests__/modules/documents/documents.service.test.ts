@@ -1,38 +1,42 @@
-import type { Prisma } from "@prisma/client/wasm";
 import { prisma } from "../../../db/client.ts";
 import { documentsService } from "../../../modules/documents/documents.service.ts";
+import {
+  deleteTestUser,
+  deleteTestUserByEmail,
+} from "../../helpers/db.ts";
 const { getDocuments, deleteDocument } = documentsService;
 
-let user: Prisma.UserCreateInput = {
-  name: "Test User",
-  email: "test123@test.com",
-  password: "test",
-};
+const userEmail = "documents.service@test.com";
 
-let document: Prisma.DocumentUncheckedCreateInput & { id: number } = {
-  id: 0,
-  filename: "Test Document",
-  path: "https://test.com/document.pdf",
-  hash: "test",
-  content: "Test Content",
-};
+let userId: string;
+let document: { id: number; filename: string; path: string };
 
 beforeAll(async () => {
-  user = await prisma.user.create({
-    data: user,
+  await deleteTestUserByEmail(userEmail);
+
+  const user = await prisma.user.create({
+    data: {
+      name: "Test User",
+      email: userEmail,
+      password: "test",
+    },
   });
+  userId = user.id;
 
   document = await prisma.document.create({
     data: {
-      userId: user.id!,
-      ...document,
+      userId,
+      filename: "Test Document",
+      path: "https://test.com/document.pdf",
+      hash: "documents-service-test",
+      content: "Test Content",
     },
   });
 });
 
 describe("Documents Service - Get Documents", () => {
   it("should return document data when a valid user id is provided", async () => {
-    const data = await getDocuments({ userId: user.id! });
+    const data = await getDocuments({ userId });
     const first = data[0];
     expect(data.length).toBeGreaterThan(0);
     expect(first).toMatchObject({
@@ -50,15 +54,15 @@ describe("Documents Service - Get Documents", () => {
 describe("Documents Service - Delete Document", () => {
   it("should return true when document is deleted", async () => {
     const data = await deleteDocument({
-      userId: user.id!,
-      id: document.id!,
+      userId,
+      id: document.id,
     });
     expect(data.success).toBe(true);
   });
 
   it("should return false when document is not found", async () => {
     const data = await deleteDocument({
-      userId: user.id!,
+      userId,
       id: 999999,
     });
     expect(data.success).toBe(false);
@@ -66,6 +70,5 @@ describe("Documents Service - Delete Document", () => {
 });
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { id: user.id! } });
-  await prisma.document.deleteMany();
+  await deleteTestUser(userId);
 });

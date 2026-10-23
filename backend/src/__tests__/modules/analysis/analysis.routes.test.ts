@@ -4,6 +4,10 @@ import { createApp } from "../../../app.ts";
 import { prisma } from "../../../db/client.ts";
 import { signToken } from "../../../modules/auth/jwt.ts";
 import { analysisService } from "../../../modules/analysis/analysis.service.ts";
+import {
+  deleteTestUser,
+  deleteTestUserByEmail,
+} from "../../helpers/db.ts";
 
 jest.mock("../../../modules/analysis/analysis.service.ts", () => ({
   analysisService: {
@@ -13,13 +17,16 @@ jest.mock("../../../modules/analysis/analysis.service.ts", () => ({
 
 const { createAnalysisAndDocument } = analysisService;
 
+const userEmail = "analysis.routes@test.com";
+
 let user: Prisma.UserCreateInput = {
   name: "Test User",
-  email: "analysis.routes@test.com",
+  email: userEmail,
   password: "test",
 };
 
 beforeAll(async () => {
+  await deleteTestUserByEmail(userEmail);
   user = await prisma.user.create({
     data: user,
   });
@@ -41,5 +48,5 @@ describe("POST /analysis", () => {
 });
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { id: user.id! } });
+  await deleteTestUser(user.id);
 });

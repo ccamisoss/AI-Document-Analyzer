@@ -2,15 +2,22 @@ import type { Prisma } from "@prisma/client/wasm";
 import { prisma } from "../../../db/client.ts";
 import bcrypt from "bcrypt";
 import { registerUser, loginUser } from "../../../modules/auth/auth.service.ts";
+import {
+  deleteTestUser,
+  deleteTestUserByEmail,
+} from "../../helpers/db.ts";
+
+const userEmail = "auth.service@test.com";
 
 let userId: string;
 let user: Prisma.UserCreateInput = {
   name: "Test User",
-  email: "test1234@test.com",
+  email: userEmail,
   password: "test1234",
 };
 
 beforeAll(async () => {
+  await deleteTestUserByEmail(userEmail);
   const hashedPassword = await bcrypt.hash(user.password, 10);
   const data = await prisma.user.create({
     data: {
@@ -93,5 +100,5 @@ describe("Auth Service - Login", () => {
 });
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { id: userId } });
+  await deleteTestUser(userId);
 });

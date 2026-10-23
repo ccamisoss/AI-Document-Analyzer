@@ -4,12 +4,19 @@ import { prisma } from "../../../db/client.ts";
 import type { Prisma } from "@prisma/client/wasm";
 import { analysisService } from "../../../modules/analysis/analysis.service.ts";
 import type { ApiResult, ApiSuccess } from "../../../http/api-response.ts";
+import {
+  deleteTestUser,
+  deleteTestUserByEmail,
+} from "../../helpers/db.ts";
+
 const { deleteAnalysis, createAnalysis, createAnalysisAndDocument } =
   analysisService;
 
+const userEmail = "analysis.service@test.com";
+
 let user: Prisma.UserCreateInput = {
   name: "Test User",
-  email: "test1234@test.com",
+  email: userEmail,
   password: "test",
 };
 
@@ -50,6 +57,7 @@ const validFile = {
 } as Express.Multer.File;
 
 beforeAll(async () => {
+  await deleteTestUserByEmail(userEmail);
   user = await prisma.user.create({
     data: user,
   });
@@ -151,5 +159,5 @@ describe("Analysis Service - Delete Analysis", () => {
 });
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { id: user.id! } });
+  await deleteTestUser(user.id);
 });
