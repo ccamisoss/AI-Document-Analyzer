@@ -105,3 +105,17 @@
   cursor: pointer;
   padding: 0 0.5rem;
 }
+
+@media (max-width: 768px) {
+  .documentItemTitleText {
+    font-size: 0.9rem;
+  }
+
+  .documentItemSubcontainerTitle {
+    font-size: 0.9rem;
+  }
+
+  .documentsContainer {
+    padding: 0 1.2rem;
+  }
+}

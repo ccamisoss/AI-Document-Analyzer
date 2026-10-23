@@ -17,3 +17,13 @@
   font-size: 1.5rem;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .message {
+    font-size: 1.2rem;
+  }
+
+  .icon {
+    font-size: 4rem !important;
+  }
+}

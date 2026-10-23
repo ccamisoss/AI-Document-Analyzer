@@ -132,3 +132,23 @@
   gap: 0.5rem;
   padding: 0.5rem;
 }
+
+@media (max-width: 768px) {
+  .rightPanelHeaderContainer button {
+    gap: 0.1rem;
+    padding: 0.1rem;
+    font-size: 0.8rem;
+  }
+
+  .rightPanelHeaderContainer h2 {
+    font-size: 1rem;
+  }
+
+  .rightPanelHeaderContainer {
+    gap: 0.5rem;
+  }
+
+  .contentContainer {
+    padding: 0 1.2rem;
+  }
+}
