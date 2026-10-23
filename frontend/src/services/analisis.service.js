@@ -30,10 +30,13 @@ const deleteAnalysis = async (analysisId) => {
   }
 };
 
-const createAnalysis = async (analysis, url) => {
+const createAnalysis = async (analysis, url, extraHeaders) => {
   try {
     const response = await request(url, {
-      headers,
+      headers: {
+        ...headers,
+        ...extraHeaders,
+      },
       method: "POST",
       body: analysis,
     });

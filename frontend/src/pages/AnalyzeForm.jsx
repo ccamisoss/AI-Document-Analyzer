@@ -67,10 +67,14 @@ function AnalyzeForm() {
     try {
       let body = null;
       let url = null;
+      let headers = {};
 
       if (document) {
         body = JSON.stringify({ prompt: prompt.trim() });
         url = `/documents/${document.id}/analyses`;
+        headers = {
+          "Content-Type": "application/json",
+        };
       } else {
         const formData = new FormData();
         formData.append("file", file);
@@ -81,7 +85,7 @@ function AnalyzeForm() {
         url = `/analysis`;
       }
 
-      const { success, error, data } = await createAnalysis(body, url);
+      const { success, error, data } = await createAnalysis(body, url, headers);
 
       if (!success) {
         throw new Error(error || "Error processing the document");
