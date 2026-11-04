@@ -89,7 +89,7 @@ const createAnalysisAndDocument = async ({
     let path: string;
 
     try {
-      path = await uploadFile(file.originalname.toString(), file);
+      path = await uploadFile(fileHash, file);
     } catch {
       return fail("Failed to upload file");
     }

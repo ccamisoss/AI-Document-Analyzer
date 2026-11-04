@@ -78,7 +78,7 @@ describe("Analysis Service - Create Analysis and Document", () => {
       analysis: { userPrompt: "Test Prompt" },
       document: {
         filename: validFile.originalname,
-        path: validFile.originalname,
+        path: expect.any(String),
       },
     });
 
