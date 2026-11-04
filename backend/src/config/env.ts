@@ -29,8 +29,8 @@ export function validateEnv() {
     missing.push("JWT_SECRET");
   }
 
-  if (env.mockLlm !== "true" && !env.openaiApiKey) {
-    missing.push("OPENAI_API_KEY (required when MOCK_LLM is not 'true')");
+  if (env.mockLlm !== "true" && !env.huggingfaceApiKey) {
+    missing.push("HF_TOKEN (required when MOCK_LLM is not 'true')");
   }
 
   if (!env.supabaseUrl) {
