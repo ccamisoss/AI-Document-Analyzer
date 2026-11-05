@@ -14,6 +14,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET,
   mockLlm: process.env.MOCK_LLM,
   huggingfaceApiKey: process.env.HF_TOKEN,
+  openRouterApiKey: process.env.OPENROUTER_API_KEY,
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
 } as const;
@@ -29,7 +30,7 @@ export function validateEnv() {
     missing.push("JWT_SECRET");
   }
 
-  if (env.mockLlm !== "true" && !env.huggingfaceApiKey) {
+  if (env.mockLlm !== "true" && !env.openRouterApiKey) {
     missing.push("HF_TOKEN (required when MOCK_LLM is not 'true')");
   }
 
