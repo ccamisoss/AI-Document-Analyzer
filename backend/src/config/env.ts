@@ -31,7 +31,7 @@ export function validateEnv() {
   }
 
   if (env.mockLlm !== "true" && !env.openRouterApiKey) {
-    missing.push("HF_TOKEN (required when MOCK_LLM is not 'true')");
+    missing.push("OPENROUTER_API_KEY (required when MOCK_LLM is not 'true')");
   }
 
   if (!env.supabaseUrl) {
