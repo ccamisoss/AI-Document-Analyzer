@@ -146,7 +146,7 @@ async function generateWithOpenRouter({
     "Content-Type": "application/json",
   };
   const payload = {
-    model: "google/gemma-4-26b-a4b-it",
+    model: "nvidia/nemotron-3.5-super-vl:free",
     messages: [
       {
         role: "system",
@@ -178,5 +178,5 @@ async function generateWithOpenRouter({
     throw new Error(content.error);
   }
 
-  return content.choices[0]?.message?.content.slice(7, -3);
+  return content.choices[0]?.message?.content;
 }

@@ -43,7 +43,10 @@ const buildSystemPrompt_v1 = (): string => {
     - notes: optional observations or comments about the document
     - answers: responses to user questions, if provided
 
-    If the document is empty, unreadable, or out of scope, you must return a warning message instead of this structure.
+    If the document is empty, unreadable, or out of scope, you must return a warning message with the following structure:
+    {
+      "error": "string"
+    }
   `;
 };
 

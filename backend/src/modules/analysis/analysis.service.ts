@@ -269,6 +269,10 @@ const createAnalysis = async ({
     return fail("AI returned malformed JSON", 502);
   }
 
+  if (aiResult?.error) {
+    return fail(aiResult.error, 502);
+  }
+
   if (
     typeof aiResult.summary !== "string" ||
     !Array.isArray(aiResult.keyPoints) ||
