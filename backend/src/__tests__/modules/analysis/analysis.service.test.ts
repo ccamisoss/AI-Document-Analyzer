@@ -9,6 +9,21 @@ import {
   deleteTestUserByEmail,
 } from "../../helpers/db.ts";
 
+jest.mock("../../../db/supabase.ts", () => ({
+  uploadFile: jest.fn(async () => "uploads/validPdf.pdf"),
+  deleteFile: jest.fn(async () => undefined),
+}));
+
+jest.mock("../../../modules/ai/llm.provider.ts", () => ({
+  generateCompletion: jest.fn(async () =>
+    JSON.stringify({
+      summary: "A short summary of the document.",
+      keyPoints: ["First point"],
+      insights: ["First insight"],
+    }),
+  ),
+}));
+
 const { deleteAnalysis, createAnalysis, createAnalysisAndDocument } =
   analysisService;
 
@@ -131,14 +146,22 @@ describe("Analysis Service - Create Analysis", () => {
 
 describe("Analysis Service - Delete Analysis", () => {
   it("should delete an analysis given a valid analysis id and user id", async () => {
-    const creationData = await createAnalysisAndDocument({
-      userId: user.id!,
-      file: validFile,
-      userPrompt: "Test Prompt",
+    const document = await prisma.document.create({
+      data: {
+        userId: user.id!,
+        filename: validFile.originalname,
+        path: "uploads/validPdf.pdf",
+        content: "Test document text",
+        hash: "analysis-delete-test",
+      },
     });
-
-    assertSuccess(creationData);
-    const analysis = creationData.data?.analysis;
+    const analysis = await prisma.analysis.create({
+      data: {
+        documentId: document.id,
+        userPrompt: "Test Prompt",
+        result: { summary: "Test" },
+      },
+    });
 
     const data = await deleteAnalysis({
       userId: user.id!,
