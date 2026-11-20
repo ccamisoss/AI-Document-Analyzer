@@ -69,8 +69,11 @@ export default function DocumentDetail() {
   }, [documentId]);
 
   useEffect(() => {
+    if (loading) return;
+
     if (analyses.length === 0) {
-      navigate(`/documentDetail?id=${documentId}`);
+      if (!analysisId) return;
+      navigate(`/documentDetail?id=${documentId}`, { replace: true });
     } else {
       const oldestAnalysis = sortAnalysesOldestFirst(analyses)[0];
       if (analysisId) {
@@ -78,13 +81,17 @@ export default function DocumentDetail() {
           (analysis) => analysis.id == analysisId,
         );
         if (foundAnalysis) {
-          setAnalysis(foundAnalysis.id);
+          setSelectedAnalysisId(foundAnalysis.id);
           return;
         }
       }
-      setAnalysis(oldestAnalysis.id);
+      setSelectedAnalysisId(oldestAnalysis.id);
+      navigate(
+        `/documentDetail?id=${documentId}&analysis=${oldestAnalysis.id}`,
+        { replace: true },
+      );
     }
-  }, [analyses, analysisId, documentId]);
+  }, [analyses, analysisId, documentId, loading]);
 
   const handleDeleteDocument = async (documentId) => {
     if (!documentId) return;
