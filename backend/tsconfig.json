@@ -40,6 +40,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
   },
   "include": ["src/**/*"],
   "extends": ["@tsconfig/node20/tsconfig.json", "@tsconfig/node-ts/tsconfig.json"]
