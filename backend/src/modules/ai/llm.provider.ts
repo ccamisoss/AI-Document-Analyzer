@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { OpenAI } from "openai";
 import { env } from "../../config/env.js";
 
 type LLMProvider = "openai" | "mock" | "huggingface" | "openRouter";
