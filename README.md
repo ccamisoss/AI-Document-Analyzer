@@ -147,13 +147,13 @@ Authenticated routes expect `Authorization: Bearer <token>`.
 ┌──────▼──────────────────────────────────────┐
 │           Backend (Express)                 │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  Routes  │─▶│Controller│─▶│ Service  │   │
+│  │  Routes  │->│Controller│->│ Service  │   │
 │  └──────────┘  └──────────┘  └────┬─────┘   │
 │                                   │         │
 │  ┌────────────────────────────────▼──────┐  │
 │  │         AI Module                     │  │
 │  │  ┌──────────────┐  ┌──────────────┐   │  │
-│  │  │Prompt Builder│─▶│ LLM Provider │   │  │
+│  │  │Prompt Builder│->│ LLM Provider │   │  │
 │  │  └──────────────┘  └──────────────┘   │  │
 │  └───────────────────────────────────────┘  │
 │                                             │

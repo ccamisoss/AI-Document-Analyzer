@@ -26,7 +26,7 @@ The application supports **single-shot, document-scoped Q&A**, meaning that the 
 
 Each analysis request is independent and stateless.
 
-If a user wants a different result, they must submit a new request by uploading the document again, optionally with a different prompt. Each submission is treated as a separate analysis and creates a new document and analysis record.
+If a user wants a different result, they must submit a new request by generating a new analysis, optionally with a different prompt. Each analysis is treated as a separate request and creates a new analysis record.
 
 
 **Flow:**  
@@ -71,8 +71,7 @@ The AI returns a structured and predictable output so it can be easily handled b
 
 ```json
 {
-  "status": "warning", //or error
-  "message": "Explanation of why the input does not meet the expected parameters."
+  "error": "Explanation of why the input does not meet the expected parameters."
 }
 ```
 
@@ -138,7 +137,7 @@ Validations:
 
 Text is extracted using a Node.js-compatible PDF parsing library.
 
-If the document is unreadable or contains no extractable text, the request fails with `status: "error"`.
+If the document is unreadable or contains no extractable text, the request fails with an error message.
 
 ### Preprocessing
 
