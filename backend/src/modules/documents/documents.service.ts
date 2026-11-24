@@ -26,8 +26,12 @@ let PDFParseCtor:
 
 const getPDFParseCtor = async () => {
   if (PDFParseCtor) return PDFParseCtor;
-  const mod = await import("pdf-parse");
-  PDFParseCtor = mod.PDFParse;
+  // pdfjs loads its worker with a dynamic import that Vercel does not bundle.
+  // `getData()` is that worker inlined as a data URL, so parsing does not need the file.
+  const { getData } = await import("pdf-parse/worker");
+  const { PDFParse } = await import("pdf-parse");
+  PDFParse.setWorker(getData());
+  PDFParseCtor = PDFParse;
   return PDFParseCtor;
 };
 
