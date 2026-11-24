@@ -4,6 +4,12 @@ An AI-powered full-stack application that analyzes PDF documents and returns str
 
 Uploading the same file again reuses the stored document and adds a new analysis. An existing document can also be analyzed again without re-uploading the PDF.
 
+## Preview
+
+The document detail view shows the stored PDF next to its analyses. Each run stays on the document, so the same file can be analyzed again without uploading it.
+
+![Document detail: PDF viewer on the left and the selected analysis result on the right](./captura.jpeg)
+
 ## Stack
 
 ### Backend
