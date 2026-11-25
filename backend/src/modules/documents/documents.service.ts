@@ -35,7 +35,7 @@ const getPDFParseCtor = async () => {
   return PDFParseCtor;
 };
 
-const MAX_PDF_SIZE_MB = 10;
+const MAX_PDF_SIZE_MB = 4;
 const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 type PdfValidationResult = {

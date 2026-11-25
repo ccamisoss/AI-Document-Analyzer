@@ -118,7 +118,7 @@ Authenticated routes expect `Authorization: Bearer <token>`.
   - **Authentication**: Required
   - **Content-Type**: `multipart/form-data`
   - **Body**:
-    - `file`: PDF file (max 10MB)
+    - `file`: PDF file (max 4MB)
     - `prompt`: Optional text to guide the analysis
 - `DELETE /analysis/:id` — Delete one analysis owned by the current user
 

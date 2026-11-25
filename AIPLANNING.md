@@ -131,7 +131,7 @@ Documents are received through `POST /analysis`.
 Validations:
 - Non-empty file
 - PDF format
-- Configurable size limit
+- Maximum file size of 4MB
 
 ### Text extraction
 
