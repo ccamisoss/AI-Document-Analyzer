@@ -6,6 +6,16 @@ import styles from "./index.module.css";
 
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
+const MAX_PDF_SIZE_BYTES = 4 * 1024 * 1024;
+
+function alertOversizedPdf() {
+  showAlert(
+    "Error processing the document",
+    "PDF size exceeds the maximum allowed limit of 4MB",
+    "error",
+  );
+}
+
 function AnalyzeForm() {
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState("");
@@ -42,6 +52,13 @@ function AnalyzeForm() {
           "Please select a PDF file",
           "error",
         );
+        e.target.value = "";
+        setFile(null);
+        return;
+      }
+      if (selectedFile.size > MAX_PDF_SIZE_BYTES) {
+        alertOversizedPdf();
+        e.target.value = "";
         setFile(null);
         return;
       }
@@ -60,6 +77,11 @@ function AnalyzeForm() {
         "Please select a PDF file",
         "error",
       );
+      return;
+    }
+
+    if (file && file.size > MAX_PDF_SIZE_BYTES) {
+      alertOversizedPdf();
       return;
     }
 
